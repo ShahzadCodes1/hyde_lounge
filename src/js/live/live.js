@@ -28,8 +28,8 @@ gsap.set(heroReveals, { autoAlpha: 0, y: 20 });
 boot('live', {
   onReveal() {
     gsap.timeline()
-      .to(heroLines, { yPercent: 0, duration: 1.2, stagger: 0.12, ease: 'expo.out' }, 0.05)
-      .to(heroReveals, { autoAlpha: 1, y: 0, duration: 1, stagger: 0.06, ease: 'expo.out' }, 0.25);
+      .to(heroLines, { yPercent: 0, duration: 1.2, stagger: 0.12, ease: 'expo.out' }, 0.45)
+      .to(heroReveals, { autoAlpha: 1, y: 0, duration: 1, stagger: 0.06, ease: 'expo.out' }, 0.7);
     initClips();
   },
 });

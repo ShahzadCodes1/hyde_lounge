@@ -32,8 +32,8 @@ gsap.set(heroReveals, { autoAlpha: 0, y: 20 });
 boot('menu', {
   onReveal() {
     gsap.timeline()
-      .to(heroLines, { yPercent: 0, duration: 1.2, ease: 'expo.out' }, 0.05)
-      .to(heroReveals, { autoAlpha: 1, y: 0, duration: 1, stagger: 0.06, ease: 'expo.out' }, 0.25);
+      .to(heroLines, { yPercent: 0, duration: 1.2, ease: 'expo.out' }, 0.45)
+      .to(heroReveals, { autoAlpha: 1, y: 0, duration: 1, stagger: 0.06, ease: 'expo.out' }, 0.7);
   },
 });
 

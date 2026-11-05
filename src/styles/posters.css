@@ -4,7 +4,14 @@
    The live canvas fades in over it once its first frame is ready, then the poster is hidden.
    Regenerate after changing a hero scene: see README ("Hero posters").
    ========================================================================== */
-.stage-poster { background: var(--bg) center / cover no-repeat; pointer-events: none; }
+.stage-poster { background: var(--bg) center / cover no-repeat; pointer-events: none; opacity: 0; transform: scale(1.04); }
+/* The hero's single entrance: the still fades up and settles as the curtain lifts (posterIn() in scenes.js).
+   Both properties share one duration, so the live 3D can cross over only when everything is at rest. */
+.stage-poster.is-in {
+  opacity: 1; transform: none;
+  transition: opacity 1.8s cubic-bezier(.3,.6,.2,1), transform 1.8s cubic-bezier(.16,1,.3,1);
+}
+@media (prefers-reduced-motion: reduce), (scripting: none) { .stage-poster { opacity: 1; transform: none; } }
 
 /* One still per screen shape, so the hand-over to the live scene lines up:
    16:9 (default) · wide windows (≥ 1.95:1) · 16:10 and squarer · tablet portrait · phone portrait. */

@@ -3,7 +3,7 @@
 import { initPaletteSwitcher } from './palette.js';
 import { injectShell } from './shell.js';
 import { initSmoothScroll, ScrollTrigger, reducedMotion } from './smooth.js';
-import { isLeaving, posterReady } from './scenes.js';
+import { isLeaving, posterReady, posterIn } from './scenes.js';
 import { initNav } from './nav.js';
 import { initCursor } from './cursor.js';
 import { runLoader, initPageTransitions, curtainUp } from './loader.js';
@@ -46,8 +46,9 @@ export async function boot(page, { preload = [], onReveal } = {}) {
   const fonts = document.fonts ? document.fonts.ready : Promise.resolve();
   // the curtain lifts with the hero picture already in place (the poster), never on an empty stage
   await runLoader([fonts, posterReady(), ...preload]);
-  initFooter();
-  ScrollTrigger.refresh();
+  posterIn();
   onReveal?.();
+  // layout work waits until the curtain is fully up, so it can never hitch the entrance
+  curtainUp.then(() => { initFooter(); ScrollTrigger.refresh(); });
   prefetchAll(page);
 }

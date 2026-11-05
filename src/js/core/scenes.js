@@ -26,6 +26,25 @@ export function openGate() { gateOpen = true; held.forEach((start) => start()); 
 
 const frame = () => new Promise((r) => requestAnimationFrame(() => r()));
 
+/** Resolves when the hero poster has finished its entrance; the live 3D never crosses over before. */
+let posterDone = Promise.resolve();
+/**
+ * The hero's one entrance: the poster (the still of the scene) fades and settles in as the curtain lifts.
+ * Everything else on the hero (copy, buttons) follows it. The live 3D then crosses over a poster that
+ * is already at rest, so there is exactly one animation and no second one.
+ */
+export function posterIn() {
+  const el = document.querySelector('.stage-poster');
+  if (!el) return;
+  if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) { el.classList.add('is-in'); return; }
+  posterDone = new Promise((r) => {
+    const done = () => r();
+    el.addEventListener('transitionend', (e) => { if (e.propertyName === 'transform') done(); });
+    setTimeout(done, 2200); // fallback (reduced motion, background tab)
+  });
+  requestAnimationFrame(() => el.classList.add('is-in'));
+}
+
 /**
  * Bring a freshly built scene in: wait for any fonts its textures use, compile its shaders,
  * draw the first frame, start it, then fade the canvas up from transparent.
@@ -43,6 +62,7 @@ export async function warm(scene, canvas, { fonts = [], prepare, ready, fade } =
   await Promise.all(fonts.map((f) => Promise.resolve(document.fonts?.load(f)).catch(() => {})));
   prepare?.();
   try { await (ready ?? scene.compile?.()); } catch { /* render anyway */ }
+  if (poster) await posterDone; // hold the hand-over until the poster's entrance is over
   await frame();
   scene.renderOnce?.();
   scene.start();

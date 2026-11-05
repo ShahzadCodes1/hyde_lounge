@@ -78,7 +78,7 @@ export function runLoader(tasks = []) {
         // One dark panel lifts straight off the page (no coloured under-layer, so no flash of colour).
         // It starts moving while the logo / page name is still fading, so there is no idle dark beat.
         .to(panel, { yPercent: -100, duration: quick ? 0.7 : 1, ease: 'power3.inOut' }, quick ? 0.08 : 0.25)
-        .add(resolve, quick ? '<0.1' : '<0.3');
+        .add(resolve, quick ? '<0.4' : '<0.55'); // the page's own entrance starts once the curtain is half way up
     });
   });
 }

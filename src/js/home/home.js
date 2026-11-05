@@ -47,8 +47,8 @@ afterCurtain(() => {
 /* ---------- intro: the sign lights up, copy rises ---------- */
 function playIntro() {
   const tl = gsap.timeline();
-  tl.to(lines, { yPercent: 0, duration: 1.2, stagger: 0.1, ease: 'expo.out' }, 0.05)
-    .to(reveals, { autoAlpha: 1, y: 0, duration: 1, stagger: 0.06, ease: 'expo.out' }, 0.3);
+  tl.to(lines, { yPercent: 0, duration: 1.2, stagger: 0.1, ease: 'expo.out' }, 0.45)
+    .to(reveals, { autoAlpha: 1, y: 0, duration: 1, stagger: 0.06, ease: 'expo.out' }, 0.7);
 }
 
 /* ---------- scroll: copy clears, camera dives through the ring, chapter 01 arrives ---------- */
