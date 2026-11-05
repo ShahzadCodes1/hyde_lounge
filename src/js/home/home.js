@@ -13,6 +13,7 @@ const reveals = hero.querySelectorAll('[data-reveal]');
 
 const lite = isTouch || window.innerWidth < 768 || (navigator.hardwareConcurrency || 8) <= 4;
 let scene = null;
+let chapters = [];
 
 // Hold the copy in its pre-intro state while the loader is up.
 gsap.set(lines, { yPercent: 115 });
@@ -35,15 +36,19 @@ queueMicrotask(() => {
   scene = track(createHeroScene(canvas, { lite, reduced: reducedMotion }));
   if (!scene) document.documentElement.classList.add('no-webgl');
   stageHero(scene, canvas, { ready: scene?.ready });
+  // The scroll choreography of the hero and the three chapters is set up now, behind the curtain
+  // (it is light), so every section works and shows its copy even if the guest scrolls before a
+  // chapter's 3D has been built.
+  if (!reducedMotion) buildScroll();
+  chapters = [initPour, initPlate, initPlay].map((init) => init({ lite, reduced: reducedMotion }));
 });
 
+// The chapters' 3D scenes are built one after another once the entrance is over, each once the one
+// before is ready, so they never compete with the ring (or each other). A chapter the guest scrolls
+// near before its turn builds at once.
 afterCurtain(() => {
-  if (!reducedMotion) buildScroll();
-  // stop the chain if the guest is already leaving
-  const later = (fn) => new Promise((r) => setTimeout(() => r(isLeaving() ? null : fn()), 250));
-  later(() => initPour({ lite, reduced: reducedMotion }).ready)
-    .then(() => later(() => initPlate({ lite, reduced: reducedMotion }).ready))
-    .then(() => later(() => initPlay({ lite, reduced: reducedMotion }).ready))
+  const later = (c) => new Promise((r) => setTimeout(() => r(isLeaving() ? null : c.build()), 250));
+  chapters.reduce((p, c) => p.then(() => later(c)), Promise.resolve())
     .then(() => { if (!isLeaving()) ScrollTrigger.refresh(); });
 });
 

@@ -90,7 +90,8 @@ export function createMenuScene(canvas, { items, lite = false }) {
 
   /* --- objects --- */
   const loader = new THREE.TextureLoader();
-  const url = (f) => import.meta.env.BASE_URL + f;
+  // phones get 640 px dish photos (half the download, a quarter of the GPU memory)
+  const url = (f) => import.meta.env.BASE_URL + (lite && /^media\/plate-\d\.webp$/.test(f) ? f.replace(/\.webp$/, '-sm.webp') : f);
   const seg = lite ? 80 : 128;
   const stone = new THREE.MeshStandardMaterial({ color: new THREE.Color('#141414'), roughness: 0.72, envMapIntensity: 0.4 });
   const plateBody = new THREE.CylinderGeometry(PLATE_R * 0.985, PLATE_R * 0.9, 0.035, 96).translate(0, 0.0175, 0);

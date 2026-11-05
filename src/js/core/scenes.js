@@ -74,14 +74,32 @@ export function stageHero(scene, canvas, { fonts = [], prepare, ready } = {}) {
   canvas.style.opacity = '0';
   const h = { scene, canvas, poster, primed: false, revealed: false };
   hero = h;
-  h.compiled = (async () => {
+  // Nothing may start the hero's render loop (the page's scroll triggers ask for it) until it is
+  // shown: a loop running behind the poster would compile and draw during the entrance.
+  const start = scene.start;
+  let allowed = false;
+  scene.start = () => { if (allowed) start(); };
+  h.allow = () => { allowed = true; };
+  // A device whose shader compile was slow before (remembered across visits) goes straight to the
+  // poster: nothing more is done for the 3D until the entrance is over, so its curtain never waits.
+  let slow = false;
+  try { slow = localStorage.getItem('hyde:slow3d') === '1'; } catch { /* private mode */ }
+  const remember = (v) => { try { if (v) localStorage.setItem('hyde:slow3d', '1'); else localStorage.removeItem('hyde:slow3d'); } catch { /* ignore */ } };
+  let gpuMs = 0;
+  const compile = async () => {
     await Promise.all(fonts.map((f) => Promise.resolve(document.fonts?.load(f)).catch(() => {})));
     prepare?.();
+    const c0 = performance.now();
     try { await (ready ?? scene.compile?.()); } catch { /* render anyway */ }
-  })();
+    gpuMs = performance.now() - c0;
+  };
+  let go;
+  h.compiled = slow ? new Promise((r) => { go = r; }).then(compile) : compile();
+  h.startCompile = () => go?.();
   // past this point (ms since the page was requested) the curtain does not wait: draw nothing more
   // now (drawing the first frame can block the screen) and let the poster play the entrance
-  const deadline = document.documentElement.classList.contains('hyde-quick') ? 1400 : 2700;
+  const deadline = slow ? 0 : document.documentElement.classList.contains('hyde-quick') ? 1400 : 2700;
+  if (slow) heroResolve(false);
   h.compiled
     .then(async () => {
       if (h.revealed || performance.now() > deadline) return false; // too late: the poster plays the entrance
@@ -91,6 +109,8 @@ export function stageHero(scene, canvas, { fonts = [], prepare, ready } = {}) {
       h.primed = true;
       return true;
     })
+    // remember a device whose shader compile alone is slow (network time does not count)
+    .then((ok) => { if (!slow) remember(gpuMs > 1200); return ok; })
     .catch(() => false)
     .then(heroResolve);
   return heroPrimedP;
@@ -110,6 +130,7 @@ export function heroIn() {
   if (poster) poster.style.display = 'none';
   canvas.dataset.hydeShown = '1';
   openGate(); // the scene moves while the curtain finishes lifting
+  h.allow();
   h.scene.start();
   if (reducedPref()) { canvas.style.opacity = ''; return 'live'; }
   canvas.style.transition = 'none';
@@ -128,8 +149,10 @@ export function heroIn() {
 export async function heroHandOver() {
   const h = hero;
   if (!h || h.primed) return;
+  h.startCompile?.();
   await h.compiled.catch(() => {});
   if (isLeaving()) return;
+  h.allow();
   await crossOver(h.scene, h.canvas, h.poster, 0.7);
 }
 

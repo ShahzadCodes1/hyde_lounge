@@ -47,6 +47,12 @@ export async function boot(page, { preload = [], onReveal } = {}) {
   initCursor();
   initPageTransitions();
 
+  // If the phone's browser takes a 3D canvas's graphics memory back (iOS does this under memory
+  // pressure), hide that canvas so the section shows its backdrop and copy rather than a black
+  // rectangle; three.js rebuilds the context and the canvas comes back when it is restored.
+  document.addEventListener('webglcontextlost', (e) => { e.target.style.visibility = 'hidden'; }, true);
+  document.addEventListener('webglcontextrestored', (e) => { e.target.style.visibility = ''; }, true);
+
   const fonts = document.fonts ? document.fonts.ready : Promise.resolve();
   // The curtain lifts once the hero's live scene has drawn its first frame (built while the curtain
   // is down, see stageHero), with the poster decoded as a fallback for a device that misses the cap.

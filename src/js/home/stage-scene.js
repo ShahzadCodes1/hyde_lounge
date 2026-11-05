@@ -134,7 +134,7 @@ export function createStageScene(canvas, { lite = false } = {}) {
   } catch {
     return null;
   }
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, lite ? 1.5 : 1.75));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, lite ? 1.25 : 1.75)); // phones: chapters render at 1.25x (the hero keeps 1.5x)
   renderer.toneMapping = THREE.NoToneMapping;
 
   const stage = COLORS.stage.clone();

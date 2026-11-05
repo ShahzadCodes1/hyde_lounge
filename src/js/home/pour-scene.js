@@ -82,7 +82,7 @@ export function createPourScene(canvas, { lite = false } = {}) {
   } catch {
     return null;
   }
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, lite ? 1.5 : 1.75));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, lite ? 1.25 : 1.75)); // phones: chapters render at 1.25x (the hero keeps 1.5x)
   renderer.localClippingEnabled = true;
   renderer.transmissionResolutionScale = lite ? 0.5 : 0.85;
   renderer.toneMapping = THREE.NoToneMapping;

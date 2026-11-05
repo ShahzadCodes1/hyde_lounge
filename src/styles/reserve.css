@@ -47,7 +47,7 @@ body[data-page='reserve'] { background: var(--bg); }
 .rstep.is-active .rstep__title { font-style: italic; }
 
 .rlabel { font-size: var(--fs-micro); letter-spacing: 0.22em; text-transform: uppercase; color: var(--text-dim); padding-top: 0.6rem; display: flex; gap: 0.8rem; align-items: baseline; flex-wrap: wrap; }
-.rhint { letter-spacing: 0.04em; text-transform: none; font-size: 0.78rem; color: var(--text-dim); opacity: 0.75; }
+.rhint { letter-spacing: 0.04em; text-transform: none; font-size: 0.78rem; color: var(--text-dim); }
 
 /* date strip */
 .rdates {

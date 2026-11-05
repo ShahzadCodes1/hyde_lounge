@@ -13,9 +13,9 @@ import { createStageScene } from './stage-scene.js';
 
 export function initPlay({ lite, reduced }) {
   const section = document.querySelector('[data-play]');
-  if (!section) return { ready: Promise.resolve() };
+  if (!section) return { build: () => Promise.resolve() };
   const canvas = section.querySelector('[data-play-canvas]');
-  const scene = track(createStageScene(canvas, { lite }));
+  let scene = null; // the 3D is built later (build()); the scroll choreography works without it
 
   const intro = section.querySelector('[data-play-intro]');
   const lines = section.querySelectorAll('[data-yl]');
@@ -26,13 +26,39 @@ export function initPlay({ lite, reduced }) {
   const loadVideos = () => videos.forEach((v) => { if (!v.getAttribute('src')) { v.src = asset(v.dataset.src); v.load(); } });
   const playVideos = (on) => videos.forEach((v) => (on ? v.play().catch(() => {}) : v.pause()));
 
+  // The 3D scene is built on demand: in the background once the hero entrance is over (home.js
+  // chains the three chapters), or at the latest when the guest scrolls near the chapter.
+  // Until its first frame is drawn the canvas stays hidden, so the section shows its own
+  // dark backdrop and copy, never a black, unpainted canvas.
+  let ready = null;
+  let lastP = 0; // the chapter's scroll progress, so a scene built mid-chapter starts in the right place
+  if (canvas) canvas.style.visibility = 'hidden';
+  const near = () => { const r = section.getBoundingClientRect(); return r.top < innerHeight && r.bottom > 0; };
+  const build = () => {
+    if (ready) return ready;
+    scene = track(createStageScene(canvas, { lite }));
+    ready = new Promise((resolve) => {
+      if (!scene) return resolve();
+      document.fonts?.load('italic 300 100px "Cormorant Garamond"').catch(() => {}).finally(() => {
+        scene.refreshWord();
+        Promise.resolve(scene.compile()).finally(() => {
+          scene.state.progress = reduced ? 0.6 : lastP;
+          scene.renderOnce();
+          if (canvas) canvas.style.visibility = '';
+          if (!reduced && near()) scene.start();
+          resolve();
+        });
+      });
+    });
+    return ready;
+  };
   if (reduced) {
     section.classList.add('is-live');
     gsap.set(intro, { display: 'none' });
     gsap.set([canvas, '.play__veil'], { opacity: 1 });
-    if (scene) { scene.state.progress = 0.6; scene.renderOnce(); }
     loadVideos();
-    return { ready: Promise.resolve() };
+    build();
+    return { build };
   }
 
   gsap.set(intro, { visibility: 'inherit' }); // inherit: stays hidden with its section until the section pins
@@ -55,6 +81,7 @@ export function initPlay({ lite, reduced }) {
     start: 'top top',
     end: 'bottom bottom',
     onUpdate(self) {
+      lastP = self.progress;
       tl.progress(self.progress);
       if (scene) scene.state.progress = self.progress;
     },
@@ -78,12 +105,7 @@ export function initPlay({ lite, reduced }) {
     else if (section.classList.contains('is-live')) scene?.start();
   });
 
-  const ready = new Promise((resolve) => {
-    if (!scene) return resolve();
-    document.fonts?.load('italic 300 100px "Cormorant Garamond"').catch(() => {}).finally(() => {
-      scene.refreshWord();
-      Promise.resolve(scene.compile()).finally(() => { scene.renderOnce(); resolve(); });
-    });
-  });
-  return { ready };
+  // the latest moment: the guest is about to scroll into the chapter
+  ScrollTrigger.create({ trigger: section, start: 'top bottom+=100%', end: 'bottom top', onEnter: build, onEnterBack: build });
+  return { build };
 }

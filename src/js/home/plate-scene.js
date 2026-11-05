@@ -113,7 +113,7 @@ export function createPlateScene(canvas, { lite = false } = {}) {
   } catch {
     return null;
   }
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, lite ? 1.5 : 1.75));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, lite ? 1.25 : 1.75)); // phones: chapters render at 1.25x (the hero keeps 1.5x)
   renderer.toneMapping = THREE.NoToneMapping;
 
   const room = COLORS.bg.clone();
@@ -171,7 +171,8 @@ export function createPlateScene(canvas, { lite = false } = {}) {
     const dishMat = new THREE.MeshStandardMaterial({ roughness: 0.55, metalness: 0, envMapIntensity: 0.25, alphaTest: 0.5, transparent: false });
     const dish = new THREE.Mesh(new THREE.CircleGeometry(PLATE_R, 96).rotateX(-Math.PI / 2), dishMat);
     dish.position.y = 0.036;
-    loader.load(import.meta.env.BASE_URL + c.file, (tex) => {
+    // phones get 640 px dish photos (half the download, a quarter of the GPU memory)
+    loader.load(import.meta.env.BASE_URL + (lite ? c.file.replace(/\.webp$/, '-sm.webp') : c.file), (tex) => {
       tex.colorSpace = THREE.SRGBColorSpace;
       tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
       dishMat.map = tex;
