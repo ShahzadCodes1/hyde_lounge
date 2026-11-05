@@ -48,6 +48,91 @@ export function posterIn() {
   requestAnimationFrame(() => el.classList.add('is-in'));
 }
 
+/* ---------- the hero scene: built while the curtain is down ----------
+ * Each page stages its hero scene as soon as its script runs. While the curtain is still closed
+ * (the screen is a still panel, so a busy GPU shows nothing) the scene is created, its shaders
+ * compiled and its first frame drawn. The curtain waits for that, up to a cap. When it lifts,
+ * the live scene itself plays the entrance: it moves from the first frame on.
+ * On a slow device that misses the cap, the poster (a still of the same scene) plays the entrance
+ * instead, and the live scene takes over once the entrance has finished.
+ */
+let hero = null;
+let heroResolve;
+const heroPrimedP = new Promise((r) => { heroResolve = r; });
+/** Resolves (true/false) once the staged hero scene has drawn its first frame. */
+export const heroPrimed = () => heroPrimedP;
+const reducedPref = () => !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
+/**
+ * @param {object|null} scene
+ * @param {HTMLCanvasElement} canvas
+ * @param {{ fonts?: string[], prepare?: () => void, ready?: Promise }} opts
+ */
+export function stageHero(scene, canvas, { fonts = [], prepare, ready } = {}) {
+  if (!scene || !canvas) { heroResolve(false); return heroPrimedP; }
+  const poster = canvas.previousElementSibling?.classList.contains('stage-poster') ? canvas.previousElementSibling : null;
+  canvas.style.opacity = '0';
+  const h = { scene, canvas, poster, primed: false, revealed: false };
+  hero = h;
+  h.compiled = (async () => {
+    await Promise.all(fonts.map((f) => Promise.resolve(document.fonts?.load(f)).catch(() => {})));
+    prepare?.();
+    try { await (ready ?? scene.compile?.()); } catch { /* render anyway */ }
+  })();
+  // past this point (ms since the page was requested) the curtain does not wait: draw nothing more
+  // now (drawing the first frame can block the screen) and let the poster play the entrance
+  const deadline = document.documentElement.classList.contains('hyde-quick') ? 1400 : 2700;
+  h.compiled
+    .then(async () => {
+      if (h.revealed || performance.now() > deadline) return false; // too late: the poster plays the entrance
+      await frame();
+      if (h.revealed || performance.now() > deadline) return false;
+      scene.renderOnce?.();
+      h.primed = true;
+      return true;
+    })
+    .catch(() => false)
+    .then(heroResolve);
+  return heroPrimedP;
+}
+
+const ENTER = 'opacity 1.8s cubic-bezier(.3,.6,.2,1), transform 1.8s cubic-bezier(.16,1,.3,1)';
+/**
+ * Called as the curtain lifts. Returns 'live' when the live scene plays the entrance,
+ * 'poster' when the still does, or 'none' when the page has no hero scene.
+ */
+export function heroIn() {
+  const h = hero;
+  if (!h) { posterIn(); return 'none'; }
+  h.revealed = true;
+  if (!h.primed) { posterIn(); return 'poster'; }
+  const { canvas, poster } = h;
+  if (poster) poster.style.display = 'none';
+  canvas.dataset.hydeShown = '1';
+  openGate(); // the scene moves while the curtain finishes lifting
+  h.scene.start();
+  if (reducedPref()) { canvas.style.opacity = ''; return 'live'; }
+  canvas.style.transition = 'none';
+  canvas.style.transform = 'scale(1.04)';
+  posterDone = new Promise((r) => setTimeout(r, 1850));
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    canvas.style.transition = ENTER;
+    canvas.style.opacity = '';
+    canvas.style.transform = '';
+    setTimeout(() => { canvas.style.transition = ''; }, 1900);
+  }));
+  return 'live';
+}
+
+/** Poster path only: once the entrance is over, bring the live scene in over the still. */
+export async function heroHandOver() {
+  const h = hero;
+  if (!h || h.primed) return;
+  await h.compiled.catch(() => {});
+  if (isLeaving()) return;
+  await crossOver(h.scene, h.canvas, h.poster, 0.7);
+}
+
 /**
  * Bring a freshly built scene in: wait for any fonts its textures use, compile its shaders,
  * draw the first frame, start it, then fade the canvas up from transparent.
@@ -68,7 +153,12 @@ export async function warm(scene, canvas, { fonts = [], prepare, ready, fade } =
   await Promise.all(fonts.map((f) => Promise.resolve(document.fonts?.load(f)).catch(() => {})));
   prepare?.();
   try { await (ready ?? scene.compile?.()); } catch { /* render anyway */ }
-  if (poster) await posterDone; // hold the hand-over until the poster's entrance is over
+  await crossOver(scene, canvas, poster, t);
+}
+
+/** Draw the first frame, line the poster up with it if needed, start the scene, fade the canvas in. */
+async function crossOver(scene, canvas, poster, t) {
+  if (poster) await posterDone; // never during the entrance
   const img = poster && canvas ? await posterImage(poster) : null;
   await frame();
   scene.renderOnce?.();

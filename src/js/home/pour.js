@@ -41,7 +41,7 @@ export function initPour({ lite, reduced }) {
     return { ready: Promise.resolve() };
   }
 
-  gsap.set(intro, { visibility: 'visible' });
+  gsap.set(intro, { visibility: 'inherit' }); // inherit: stays hidden with its section until the section pins
   gsap.set(lines, { yPercent: 115 });
   gsap.set(reveals, { autoAlpha: 0, y: 26 });
   gsap.set(cards, { autoAlpha: 0, y: 140, rotateX: 28, rotateZ: (i) => [-8, 7, -4][i], scale: 0.86, transformOrigin: '50% 100%' });
@@ -71,7 +71,7 @@ export function initPour({ lite, reduced }) {
     .to(cards, { yPercent: (i) => [-14, -22, -9][i], duration: 0.2 }, 0.78)
     .to('.pour__copy', { autoAlpha: 0, y: -30, duration: 0.06 }, 0.84)
     .to({ w: 0 }, { w: 1, duration: 0.13, onUpdate() { setWipe(this.targets()[0].w); } }, 0.86)
-    .set(next, { visibility: 'visible' }, 0.95)
+    .set(next, { visibility: 'inherit' }, 0.95)
     .fromTo(next.querySelector('[data-next-word]'), { yPercent: 115 }, { yPercent: 0, duration: 0.05, ease: 'power3.out' }, 0.95)
     .fromTo(next.querySelector('.eyebrow'), { autoAlpha: 0 }, { autoAlpha: 0.85, duration: 0.03 }, 0.97)
     .to({}, { duration: 0.001 }, 1);

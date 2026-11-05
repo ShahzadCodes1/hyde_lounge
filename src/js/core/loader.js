@@ -57,7 +57,8 @@ export function runLoader(tasks = []) {
 
     // Never hold the curtain for long: if a font is slow, lift anyway (text swaps in when it lands).
     const settled = Promise.allSettled(all);
-    const waited = Promise.race([settled, new Promise((r) => setTimeout(r, quick ? 600 : 2500))]);
+    // (the hero's 3D first frame is one of the tasks: a device that is slower than this plays the entrance on the poster)
+    const waited = Promise.race([settled, new Promise((r) => setTimeout(r, quick ? 1500 : 2800))]);
     Promise.all([waited, minTime]).then(() => {
       gsap.ticker.remove(tick);
       if (count) count.textContent = '100';

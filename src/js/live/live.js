@@ -1,5 +1,5 @@
-import { boot, afterCurtain } from '../core/app.js';
-import { track, warm } from '../core/scenes.js';
+import { boot } from '../core/app.js';
+import { track, stageHero } from '../core/scenes.js';
 import { gsap, ScrollTrigger, reducedMotion, isTouch } from '../core/smooth.js';
 import { createLiveScene } from './live-scene.js';
 import { fadeInUpperZone } from '../core/zone.js';
@@ -34,15 +34,14 @@ boot('live', {
   },
 });
 
-// The deck is built once the curtain is up; it fades in when its first frame is ready.
-afterCurtain(() => {
-  if (canvas) canvas.style.opacity = '0';
+// The deck is built while the curtain is down, so it is live the moment the curtain lifts.
+queueMicrotask(() => {
   scene = track(createLiveScene(canvas, { lite }));
   if (!scene) document.documentElement.classList.add('no-webgl');
   else scene.setTint(nights[0].dataset.hue, true);
   if (reducedMotion) staticPage();
   else build();
-  warm(scene, canvas, {
+  stageHero(scene, canvas, {
     fonts: ['italic 300 100px "Cormorant Garamond"', '300 100px "Cormorant Garamond"', '600 30px "Manrope"'],
     prepare: () => scene.refreshText(),
   });

@@ -1,5 +1,5 @@
-import { boot, afterCurtain } from '../core/app.js';
-import { track, warm } from '../core/scenes.js';
+import { boot } from '../core/app.js';
+import { track, stageHero } from '../core/scenes.js';
 import { gsap, ScrollTrigger, reducedMotion, isTouch } from '../core/smooth.js';
 import { createBrunchScene } from './brunch-scene.js';
 import { fadeInUpperZone } from '../core/zone.js';
@@ -30,14 +30,13 @@ boot('brunch', {
   },
 });
 
-// The tower is built once the curtain is up; it fades in when its first frame is ready.
-afterCurtain(() => {
-  if (canvas) canvas.style.opacity = '0';
+// The tower is built while the curtain is down, so it is live the moment the curtain lifts.
+queueMicrotask(() => {
   scene = track(createBrunchScene(canvas, { lite }));
   if (!scene) document.documentElement.classList.add('no-webgl');
   if (reducedMotion) staticPage();
   else build();
-  warm(scene, canvas, {
+  stageHero(scene, canvas, {
     fonts: ['italic 300 100px "Cormorant Garamond"', '300 100px "Cormorant Garamond"', '600 22px "Manrope"'],
     prepare: () => scene.refreshText(),
   });

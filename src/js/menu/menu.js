@@ -1,5 +1,5 @@
-import { boot, afterCurtain } from '../core/app.js';
-import { track, warm } from '../core/scenes.js';
+import { boot } from '../core/app.js';
+import { track, stageHero } from '../core/scenes.js';
 import { gsap, ScrollTrigger, reducedMotion, isTouch, getLenis } from '../core/smooth.js';
 import { createMenuScene } from './menu-scene.js';
 import { fadeInUpperZone } from '../core/zone.js';
@@ -37,13 +37,13 @@ boot('menu', {
   },
 });
 
-// The table is set once the curtain is up; it fades in when its first frame is ready.
-afterCurtain(() => {
-  if (canvas) canvas.style.opacity = '0';
+// The table is set while the curtain is down (once this module has finished running), so it is
+// live and moving the moment the curtain lifts.
+queueMicrotask(() => {
   scene = track(createMenuScene(canvas, { items, lite }));
   if (!scene) document.documentElement.classList.add('no-webgl');
   build();
-  warm(scene, canvas, { fonts: ['italic 300 100px "Cormorant Garamond"'], prepare: () => scene.refreshWord() });
+  stageHero(scene, canvas, { fonts: ['italic 300 100px "Cormorant Garamond"'], prepare: () => scene.refreshWord() });
 });
 
 function setActive(i) {

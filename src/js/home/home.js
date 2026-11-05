@@ -1,5 +1,5 @@
 import { boot, afterCurtain } from '../core/app.js';
-import { track, warm, isLeaving } from '../core/scenes.js';
+import { track, stageHero, isLeaving } from '../core/scenes.js';
 import { gsap, ScrollTrigger, reducedMotion, isTouch } from '../core/smooth.js';
 import { createHeroScene } from './hero-scene.js';
 import { initPour } from './pour.js';
@@ -19,29 +19,32 @@ gsap.set(lines, { yPercent: 115 });
 gsap.set(reveals, { autoAlpha: 0, y: 24 });
 
 boot('home', {
-  onReveal() {
+  onReveal(mode) {
+    // live: the ring lights up as the entrance; on the poster path it is already lit (the poster is)
+    if (scene && mode === 'live' && !reducedMotion) gsap.to(scene.state, { intro: 1, duration: 2.6, ease: 'power1.inOut' });
+    else if (scene) scene.state.intro = 1;
     playIntro();
     if (reducedMotion) gsap.set('[data-chapter]', { display: 'none' });
   },
 });
 
-// The ring is built once the curtain is up, fades in when its first frame is ready, then lights.
-// The three chapters below build one after another in the background, each once the one before
-// is ready, so they never compete with the ring (or each other) for the GPU.
-afterCurtain(() => {
-  if (canvas) canvas.style.opacity = '0';
+// The ring is built while the curtain is down (once this module has run), so it is live and lights
+// up as the curtain lifts. The three chapters below build one after another once the entrance is
+// over, each once the one before is ready, so they never compete with the ring (or each other).
+queueMicrotask(() => {
   scene = track(createHeroScene(canvas, { lite, reduced: reducedMotion }));
   if (!scene) document.documentElement.classList.add('no-webgl');
+  stageHero(scene, canvas, { ready: scene?.ready });
+});
+
+afterCurtain(() => {
   if (!reducedMotion) buildScroll();
-  if (scene) scene.state.intro = 1; // the poster already shows the ring lit; the live ring takes over lit
-  warm(scene, canvas, { ready: scene?.ready }).then(() => {
-    // stop the chain if the guest is already leaving
-    const later = (fn) => new Promise((r) => setTimeout(() => r(isLeaving() ? null : fn()), 250));
-    return later(() => initPour({ lite, reduced: reducedMotion }).ready)
-      .then(() => later(() => initPlate({ lite, reduced: reducedMotion }).ready))
-      .then(() => later(() => initPlay({ lite, reduced: reducedMotion }).ready))
-      .then(() => { if (!isLeaving()) ScrollTrigger.refresh(); });
-  });
+  // stop the chain if the guest is already leaving
+  const later = (fn) => new Promise((r) => setTimeout(() => r(isLeaving() ? null : fn()), 250));
+  later(() => initPour({ lite, reduced: reducedMotion }).ready)
+    .then(() => later(() => initPlate({ lite, reduced: reducedMotion }).ready))
+    .then(() => later(() => initPlay({ lite, reduced: reducedMotion }).ready))
+    .then(() => { if (!isLeaving()) ScrollTrigger.refresh(); });
 });
 
 /* ---------- intro: the sign lights up, copy rises ---------- */

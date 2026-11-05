@@ -35,7 +35,7 @@ export function initPlay({ lite, reduced }) {
     return { ready: Promise.resolve() };
   }
 
-  gsap.set(intro, { visibility: 'visible' });
+  gsap.set(intro, { visibility: 'inherit' }); // inherit: stays hidden with its section until the section pins
   gsap.set(lines, { yPercent: 115 });
   gsap.set(reveals, { autoAlpha: 0, y: 26 });
   gsap.set(cards, { autoAlpha: 0, y: 140, rotateX: 28, rotateZ: (i) => [5, -6, -3, 4][i], scale: 0.86, transformOrigin: '50% 100%' });

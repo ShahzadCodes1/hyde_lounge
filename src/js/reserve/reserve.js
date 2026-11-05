@@ -1,5 +1,5 @@
-import { boot, afterCurtain } from '../core/app.js';
-import { track, warm } from '../core/scenes.js';
+import { boot } from '../core/app.js';
+import { track, stageHero } from '../core/scenes.js';
 import { gsap, ScrollTrigger, reducedMotion, isTouch, getLenis } from '../core/smooth.js';
 import { VENUE } from '../core/shell.js';
 import { createReserveScene } from './reserve-scene.js';
@@ -187,14 +187,13 @@ boot('reserve', {
   },
 });
 
-// The table is set once the curtain is up; it fades in when its first frame is ready.
-afterCurtain(() => {
-  if (canvas) canvas.style.opacity = '0';
+// The table is set while the curtain is down, so it is live the moment the curtain lifts.
+queueMicrotask(() => {
   scene = track(createReserveScene(canvas, { lite }));
   if (!scene) document.documentElement.classList.add('no-webgl');
   syncCard(); // engrave whatever has been chosen so far
   build();
-  warm(scene, canvas, {
+  stageHero(scene, canvas, {
     fonts: ['italic 300 100px "Cormorant Garamond"', '300 100px "Cormorant Garamond"', '600 30px "Manrope"'],
     prepare: () => scene.refreshText(),
   });
