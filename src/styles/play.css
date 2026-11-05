@@ -1,0 +1,94 @@
+/* ==========================================================================
+   HOME — Chapter 03: Play (the stage)
+   Opens on the same spotlit "Play." frame that closes Chapter 02.
+   ========================================================================== */
+.play {
+  position: relative;
+  z-index: 4;
+  height: 480vh;
+  margin-top: -100vh;
+  margin-top: -100svh;
+}
+.play__sticky {
+  position: sticky; top: 0;
+  height: 100vh; height: 100svh;
+  overflow: hidden;
+  background: var(--stage);
+  color: var(--text);
+  visibility: hidden;
+}
+.play.is-live .play__sticky { visibility: visible; }
+
+.play__canvas { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; }
+.play__veil {
+  position: absolute; inset: 0; pointer-events: none; opacity: 0;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--stage) 85%, transparent) 0%, transparent 46%),
+    linear-gradient(to top, color-mix(in srgb, var(--stage) 60%, transparent) 0%, transparent 24%);
+}
+
+.play__copy {
+  position: absolute;
+  left: var(--gutter);
+  top: 50%;
+  transform: translateY(-46%);
+  width: min(30rem, 38vw);
+  display: grid;
+  gap: 1.3rem;
+  justify-items: start;
+}
+.play__copy .eyebrow { color: var(--accent); }
+.play__title { font-family: var(--serif); font-weight: 300; font-size: var(--fs-display); line-height: 0.96; letter-spacing: -0.015em; }
+.play__title [data-yl] { display: inline-block; }
+.play__title em { font-style: italic; color: var(--accent); padding-right: 0.08em; }
+.play__text { color: var(--text-dim); max-width: 34ch; }
+
+/* the week at Hyde */
+.play__week { list-style: none; width: 100%; border-top: 1px solid var(--line); }
+.play__week li { display: flex; align-items: baseline; gap: 1rem; padding: 0.7rem 0; border-bottom: 1px solid var(--line); }
+.play__day { min-width: 5.2rem; font-size: var(--fs-micro); letter-spacing: 0.22em; text-transform: uppercase; color: var(--accent); }
+.play__what { display: grid; gap: 0.2rem; font-family: var(--serif); font-size: 1.3rem; line-height: 1.15; }
+.play__what small { font-family: var(--sans); font-size: var(--fs-small); color: var(--text-dim); line-height: 1.45; }
+
+/* footage */
+.play__cards { position: absolute; inset: 0; pointer-events: none; perspective: 1200px; }
+.play-card { width: clamp(130px, 12vw, 200px); }
+.play-card--poster { width: clamp(140px, 13vw, 220px); }
+.play-card--poster .pour-card__media { aspect-ratio: 9 / 16; }
+.play-card--a { right: 3%; top: 7%; }
+.play-card--b { right: 17%; bottom: 7%; }
+.play-card--c { left: 40%; top: 9%; }
+.play-card--d { right: 2.5%; bottom: 10%; }
+
+/* ---------- tablet (landscape) ---------- */
+@media (max-width: 1100px) and (min-aspect-ratio: 1/1) {
+  .play__copy { width: min(26rem, 40vw); }
+  .play__text { display: none; }
+  .play-card--c { display: none; }
+}
+
+/* ---------- portrait ---------- */
+@media (max-aspect-ratio: 1/1) {
+  .play__title { line-height: 1.04; }
+  .play { height: 420vh; }
+  .play__veil { background: linear-gradient(to top, var(--stage) 0%, color-mix(in srgb, var(--stage) 85%, transparent) 36%, transparent 62%); }
+  .play__copy { top: auto; transform: none; bottom: calc(1.6rem + env(safe-area-inset-bottom)); right: var(--gutter); width: auto; gap: 0.9rem; }
+  .play__text { display: none; }
+  .play__week li { padding: 0.45rem 0; }
+  .play__week li:nth-child(2) small { display: none; }
+  .play-card { width: clamp(80px, 20vw, 150px); }
+  .play-card--poster { width: clamp(84px, 21vw, 155px); }
+  .play-card--a { left: var(--gutter); right: auto; top: calc(var(--nav-h) + 1vh); bottom: auto; }
+  .play-card--c { left: auto; right: var(--gutter); top: calc(var(--nav-h) + 1vh); }
+  .play-card--b, .play-card--d { display: none; }
+  .play__cards figcaption small { display: none; }
+}
+@media (max-aspect-ratio: 1/1) and (max-height: 720px) {
+  .play__week { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .play { height: auto; margin-top: 0; }
+  .play__sticky { visibility: visible; position: relative; }
+  .play__canvas, .play__veil { opacity: 1; }
+}

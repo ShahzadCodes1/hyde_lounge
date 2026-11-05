@@ -1,0 +1,84 @@
+/* ==========================================================================
+   HYDE LOUNGE — Palettes
+   The brand terracotta (#9a3f26, from the logo) is fixed in every palette.
+   Everything else is semantic so the whole site, including the 3D scene,
+   re-colours from one attribute: <html data-palette="…">.
+
+   --bg / --bg-2 / --bg-3  night backgrounds, darkest → lifted
+   --text                  primary copy
+   --accent                italic headline accents, highlights
+   --metal                 eyebrows, fine details (the "jewellery")
+   --chapter / --on-chapter colour the scroll dive arrives in, and its text
+   --glow                  bulb / candle light colour
+   --haze                  smoke + atmosphere tint
+   --dust                  floating particles
+   --stage                 the darkest black: the stage after the lights go down
+   ========================================================================== */
+
+:root,
+:root[data-palette='emerald'] {
+  /* ★ CHOSEN — Emerald Noir — bottle-green night, echoing the teal bar glow in the venue footage.
+     Green is terracotta's complement, so the logo glows hardest here. */
+  --brand: #9a3f26;
+  --bg: #050d0b;
+  --bg-2: #0a1713;
+  --bg-3: #10221c;
+  --text: #f1ebdf;
+  --accent: #d8bd86;
+  --metal: #b99c66;
+  --chapter: #0e3a2f;
+  --on-chapter: #f1ebdf;
+  --glow: #ffd8a0;
+  --haze: #1d6b56;
+  --dust: #e8d3a4;
+  --stage: #010302;
+  color-scheme: dark;
+}
+
+:root[data-palette='noir'] {
+  /* Noir Champagne — black-tie: pure black, champagne gold, a flash of light at the dive. */
+  --bg: #060606;
+  --bg-2: #0f0f0e;
+  --bg-3: #191816;
+  --text: #f6f2ea;
+  --accent: #e4cfa6;
+  --metal: #bca478;
+  --chapter: #ebe2d0;
+  --on-chapter: #141210;
+  --glow: #ffe6bf;
+  --haze: #4a433a;
+  --dust: #efe0bf;
+  --stage: #000000;
+}
+
+:root[data-palette='velvet'] {
+  /* Velvet Oxblood — wine-dark lounge velvet with rose-gold detailing. */
+  --bg: #0c0508;
+  --bg-2: #170910;
+  --bg-3: #231019;
+  --text: #f5e9e4;
+  --accent: #e8b39a;
+  --metal: #c9977f;
+  --chapter: #3d0c1d;
+  --on-chapter: #f5e9e4;
+  --glow: #ffcfae;
+  --haze: #7a1f3a;
+  --dust: #f2c4ab;
+  --stage: #030102;
+}
+
+:root[data-palette='midnight'] {
+  /* Midnight Brass — inky navy with warm brass; warm bulbs against a cool night sky. */
+  --bg: #04070e;
+  --bg-2: #0a1020;
+  --bg-3: #111a2e;
+  --text: #f2eee6;
+  --accent: #d9b46c;
+  --metal: #ab9060;
+  --chapter: #0f2445;
+  --on-chapter: #f2eee6;
+  --glow: #ffd296;
+  --haze: #224477;
+  --dust: #e2c890;
+  --stage: #010204;
+}

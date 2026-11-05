@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en" data-page="reserve">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#050d0b" />
+  <title>Reserve — Hyde Lounge</title>
+  <meta name="description" content="Book a table at Hyde Lounge, Adliya Block 338, Bahrain. Daily 8 PM – 2:30 AM, Friday brunch from 1 PM." />
+  <link rel="icon" type="image/svg+xml" href="/brand/favicon.svg" />
+  <script>
+    /* First paint — runs before anything is drawn (kept inline on purpose; same block on all five pages).
+       1. never restore an old scroll position: every load opens at the top
+       2. coming back after leaving the site (Back from another site, a reopened tab, a restored
+          browser session) starts over on the Home page, with the full intro
+       3. later pages in the same visit open with the transition curtain already closed */
+    (function (w, h) {
+      var s = null, AWAY = 3000, HOME = './', home = h.getAttribute('data-page') === 'home';
+      try { s = w.sessionStorage; } catch (e) {}
+      function get(k) { try { return s ? s.getItem(k) : null; } catch (e) { return null; } }
+      function set(k, v) { try { if (s) s.setItem(k, v); } catch (e) {} }
+      function del(k) { try { if (s) s.removeItem(k); } catch (e) {} }
+      function away() { var t = +get('hyde:left'); return !t || Date.now() - t > AWAY; }
+      function startOver() { del('hyde:seen'); if (home) w.location.reload(); else w.location.replace(HOME); }
+      try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch (e) {}
+      var nav = w.performance && performance.getEntriesByType ? performance.getEntriesByType('navigation')[0] : null;
+      if (nav && nav.type === 'back_forward' && away()) {
+        del('hyde:seen');
+        if (!home) { w.__hydeLeaving = true; h.className += ' hyde-quick'; w.location.replace(HOME); return; }
+      }
+      w.addEventListener('pagehide', function () { set('hyde:left', String(Date.now())); });
+      w.addEventListener('pageshow', function (e) { if (e.persisted) { if (away()) startOver(); else w.location.reload(); } });
+      if (get('hyde:seen') === '1' || (w.matchMedia && w.matchMedia('(prefers-reduced-motion: reduce)').matches)) h.className += ' hyde-quick';
+    })(window, document.documentElement);
+  </script>
+  <link rel="stylesheet" href="/src/styles/site.css" />
+  <link rel="stylesheet" href="/src/styles/reserve.css" />
+</head>
+<body data-page="reserve" class="is-loading">
+  <!-- The curtain is part of the page itself, so it is the very first thing painted. -->
+  <div class="loader" data-loader>
+    <div class="loader__panel"></div>
+    <div class="loader__inner">
+      <img class="loader__logo" src="/src/assets/hyde-logo.svg" alt="" />
+      <div class="loader__bar"><i></i></div>
+      <div class="loader__meta"><span>Bahrain</span><span class="loader__count" data-count>000</span></div>
+    </div>
+    <p class="loader__note" data-loader-note>Reserve<small>Hyde Lounge</small></p>
+  </div>
+  <!-- a still of the scene's first frame, painted with the page; the live 3D fades in over it -->
+  <div class="reserve-stage stage-poster" data-poster="reserve" aria-hidden="true"></div>
+  <canvas class="reserve-stage" data-reserve-stage aria-hidden="true"></canvas>
+  <div class="reserve-veil" data-reserve-veil aria-hidden="true"></div>
+
+  <main class="reserve-page">
+    <!-- ============ HERO — the table is set, the candle is lit ============ -->
+    <section class="rhero" data-rhero>
+      <div class="rhero__copy">
+        <p class="eyebrow" data-rh>Reservations</p>
+        <h1 class="rhero__title">
+          <span class="split-line"><span data-rhl>Your table</span></span>
+          <span class="split-line"><span data-rhl><em>is waiting.</em></span></span>
+        </h1>
+        <p class="rhero__lede" data-rh>Tell us when, and who&rsquo;s coming. Your card is set as you go, and your request comes straight to our host on WhatsApp.</p>
+        <a class="btn" href="#book" data-rh data-to-form><span class="dot"></span>Start your booking</a>
+      </div>
+      <span class="rhero__cue" data-rh><i></i>Scroll to light the candle</span>
+    </section>
+
+    <!-- ============ THE BOOKING ============ -->
+    <form class="rform" id="book" data-form novalidate>
+      <!-- 01 — when -->
+      <fieldset class="rstep" data-step="0">
+        <legend class="rstep__head"><span class="rstep__num">01</span><span class="rstep__title">When</span></legend>
+        <p class="rlabel" id="lbl-date">Date</p>
+        <div class="rdates" role="radiogroup" aria-labelledby="lbl-date" data-dates></div>
+        <p class="rlabel" id="lbl-time">Time <span class="rhint" data-time-hint>Seating from 8 PM; last seating 1:30 AM</span></p>
+        <div class="rchips rchips--time" role="radiogroup" aria-labelledby="lbl-time" data-times></div>
+        <p class="rerror" data-error="when" role="alert"></p>
+      </fieldset>
+
+      <!-- 02 — who -->
+      <fieldset class="rstep" data-step="1">
+        <legend class="rstep__head"><span class="rstep__num">02</span><span class="rstep__title">Who</span></legend>
+        <p class="rlabel" id="lbl-party">Guests</p>
+        <div class="rparty" role="group" aria-labelledby="lbl-party">
+          <button type="button" class="rparty__btn" data-party="-1" aria-label="One fewer guest">&minus;</button>
+          <output class="rparty__val" data-party-val aria-live="polite">2</output>
+          <button type="button" class="rparty__btn" data-party="1" aria-label="One more guest">+</button>
+          <span class="rhint" data-party-hint>Twenty or more? Message us and we&rsquo;ll plan it with you.</span>
+        </div>
+        <p class="rlabel" id="lbl-seat">Seating</p>
+        <div class="rchips" role="radiogroup" aria-labelledby="lbl-seat" data-group="seating">
+          <button type="button" class="rchip is-on" role="radio" aria-checked="true" data-value="Lounge">Lounge</button>
+          <button type="button" class="rchip" role="radio" aria-checked="false" data-value="Near the stage">Near the stage</button>
+          <button type="button" class="rchip" role="radio" aria-checked="false" data-value="At the bar">At the bar</button>
+        </div>
+        <p class="rlabel" id="lbl-occ">Occasion <span class="rhint">optional</span></p>
+        <div class="rchips" role="radiogroup" aria-labelledby="lbl-occ" data-group="occasion">
+          <button type="button" class="rchip is-on" role="radio" aria-checked="true" data-value="">None</button>
+          <button type="button" class="rchip" role="radio" aria-checked="false" data-value="Birthday">Birthday</button>
+          <button type="button" class="rchip" role="radio" aria-checked="false" data-value="Anniversary">Anniversary</button>
+          <button type="button" class="rchip" role="radio" aria-checked="false" data-value="Date night">Date night</button>
+          <button type="button" class="rchip" role="radio" aria-checked="false" data-value="Celebration">Celebration</button>
+          <button type="button" class="rchip" role="radio" aria-checked="false" data-value="Business">Business</button>
+        </div>
+      </fieldset>
+
+      <!-- 03 — details -->
+      <fieldset class="rstep" data-step="2">
+        <legend class="rstep__head"><span class="rstep__num">03</span><span class="rstep__title">Your details</span></legend>
+        <label class="rfield"><span class="rlabel">Name</span><input name="name" autocomplete="name" placeholder="Name for the booking" required data-name /></label>
+        <label class="rfield"><span class="rlabel">Mobile</span><input name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+973" required data-phone /></label>
+        <label class="rfield"><span class="rlabel">Anything we should know? <span class="rhint">optional</span></span><textarea name="notes" rows="3" placeholder="Allergies, a surprise, a favourite table…" data-notes></textarea></label>
+        <p class="rerror" data-error="details" role="alert"></p>
+        <div class="rsubmit">
+          <button type="submit" class="btn rsubmit__btn"><span class="dot"></span>Send request on WhatsApp</button>
+          <p class="rsubmit__alt">Prefer to call? <a class="link-u" href="tel:+97366655099">+973 6665 5099</a></p>
+        </div>
+        <div class="rdone" data-done hidden>
+          <p class="eyebrow">Request ready</p>
+          <p class="rdone__text">Your request has opened in WhatsApp. Send it, and our host will confirm your table.</p>
+          <a class="link-u" href="#" data-reopen>Didn&rsquo;t open? Tap here.</a>
+        </div>
+      </fieldset>
+    </form>
+
+    <!-- ============ VISIT ============ -->
+    <section class="rvisit" data-rvisit>
+      <header class="rvisit__head">
+        <p class="eyebrow">Find us</p>
+        <h2 class="rvisit__title">Adliya, <em>Block 338.</em></h2>
+      </header>
+      <dl class="rvisit__grid">
+        <div><dt>Address</dt><dd>Hyde Lounge<br />Adliya, Block 338<br />Manama, Bahrain</dd></div>
+        <div><dt>Hours</dt><dd>Daily, 8 PM – 2:30 AM<br />Friday brunch from 1 PM</dd></div>
+        <div><dt>Parking</dt><dd>Parking available<br />at the venue</dd></div>
+        <div><dt>Reservations</dt><dd><a class="link-u" href="tel:+97366655099">+973 6665 5099</a><br /><a class="link-u" href="https://wa.me/97366655099" target="_blank" rel="noopener">WhatsApp</a> · <a class="link-u" href="https://www.instagram.com/hydebahrain/" target="_blank" rel="noopener">@hydebahrain</a></dd></div>
+      </dl>
+      <div class="rvisit__btns">
+        <a class="btn" href="https://www.google.com/maps/search/?api=1&amp;query=Hyde+Lounge+Adliya+Bahrain" target="_blank" rel="noopener"><span class="dot"></span>Open in Maps</a>
+        <a class="btn btn--ghost" href="tel:+97366655099">Call us</a>
+      </div>
+      <p class="rnote">Bookings are confirmed by our host. Tables are held for 15 minutes. Smart-elegant dress. Guests 21 and over. House notes shown for preview.</p>
+    </section>
+  </main>
+  <script type="module" src="/src/js/reserve/reserve.js"></script>
+</body>
+</html>

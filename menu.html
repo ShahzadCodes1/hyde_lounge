@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en" data-page="menu">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#050d0b" />
+  <title>The Menu — Hyde Lounge</title>
+  <meta name="description" content="The Hyde Lounge menu: a kitchen built for sharing and a bar poured with theatre. Adliya, Bahrain." />
+  <link rel="icon" type="image/svg+xml" href="/brand/favicon.svg" />
+  <script>
+    /* First paint — runs before anything is drawn (kept inline on purpose; same block on all five pages).
+       1. never restore an old scroll position: every load opens at the top
+       2. coming back after leaving the site (Back from another site, a reopened tab, a restored
+          browser session) starts over on the Home page, with the full intro
+       3. later pages in the same visit open with the transition curtain already closed */
+    (function (w, h) {
+      var s = null, AWAY = 3000, HOME = './', home = h.getAttribute('data-page') === 'home';
+      try { s = w.sessionStorage; } catch (e) {}
+      function get(k) { try { return s ? s.getItem(k) : null; } catch (e) { return null; } }
+      function set(k, v) { try { if (s) s.setItem(k, v); } catch (e) {} }
+      function del(k) { try { if (s) s.removeItem(k); } catch (e) {} }
+      function away() { var t = +get('hyde:left'); return !t || Date.now() - t > AWAY; }
+      function startOver() { del('hyde:seen'); if (home) w.location.reload(); else w.location.replace(HOME); }
+      try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch (e) {}
+      var nav = w.performance && performance.getEntriesByType ? performance.getEntriesByType('navigation')[0] : null;
+      if (nav && nav.type === 'back_forward' && away()) {
+        del('hyde:seen');
+        if (!home) { w.__hydeLeaving = true; h.className += ' hyde-quick'; w.location.replace(HOME); return; }
+      }
+      w.addEventListener('pagehide', function () { set('hyde:left', String(Date.now())); });
+      w.addEventListener('pageshow', function (e) { if (e.persisted) { if (away()) startOver(); else w.location.reload(); } });
+      if (get('hyde:seen') === '1' || (w.matchMedia && w.matchMedia('(prefers-reduced-motion: reduce)').matches)) h.className += ' hyde-quick';
+    })(window, document.documentElement);
+  </script>
+  <link rel="stylesheet" href="/src/styles/site.css" />
+  <link rel="stylesheet" href="/src/styles/menu.css" />
+</head>
+<body data-page="menu" class="is-loading">
+  <!-- The curtain is part of the page itself, so it is the very first thing painted. -->
+  <div class="loader" data-loader>
+    <div class="loader__panel"></div>
+    <div class="loader__inner">
+      <img class="loader__logo" src="/src/assets/hyde-logo.svg" alt="" />
+      <div class="loader__bar"><i></i></div>
+      <div class="loader__meta"><span>Bahrain</span><span class="loader__count" data-count>000</span></div>
+    </div>
+    <p class="loader__note" data-loader-note>The Menu<small>Hyde Lounge</small></p>
+  </div>
+  <!-- a still of the scene's first frame, painted with the page; the live 3D fades in over it -->
+  <div class="menu-stage stage-poster" data-poster="menu" aria-hidden="true"></div>
+  <canvas class="menu-stage" data-menu-stage aria-hidden="true"></canvas>
+  <div class="menu-veil" aria-hidden="true"></div>
+  <main class="menu-page">
+    <!-- ============ HERO — the table from above ============ -->
+    <section class="mhero" data-mhero>
+      <div class="mhero__inner">
+        <p class="eyebrow" data-mh>Kitchen &amp; Bar</p>
+        <h1 class="mhero__title"><span class="split-line"><span data-mhl>The <em>Menu.</em></span></span></h1>
+        <p class="mhero__lede" data-mh>A kitchen built for sharing and a bar poured with theatre. Scroll, and each one is served.</p>
+      </div>
+      <span class="mhero__cue" data-mh><i></i>Scroll to be served</span>
+    </section>
+
+    <!-- quick jump between the two halves of the menu -->
+    <nav class="mjump" data-mjump aria-label="Menu sections">
+      <div class="mjump__pills">
+        <a href="#kitchen" data-jump="kitchen" class="is-current">Kitchen</a>
+        <a href="#bar" data-jump="bar">Bar</a>
+      </div>
+    </nav>
+
+    <div class="mlist">
+      <!-- ============ THE KITCHEN ============ -->
+      <section class="mcat" id="kitchen" data-cat="kitchen">
+        <header class="mcat__head"><p class="eyebrow">The Kitchen</p><h2 class="mcat__title">Raw <em>&amp; cold</em></h2></header>
+          <article class="mitem" data-item="0" data-kind="plate" data-file="media/plate-5.webp">
+            <p class="mitem__meta"><span class="mitem__tag">Raw bar</span><span class="mitem__price">BHD 7.5</span></p>
+            <h3 class="mitem__name">Tuna tartare</h3>
+            <p class="mitem__desc">Diced tuna and avocado, citrus ponzu, mango, micro greens.</p>
+          </article>
+          <article class="mitem" data-item="1" data-kind="plate" data-file="media/plate-3.webp">
+            <p class="mitem__meta"><span class="mitem__tag">To share</span><span class="mitem__price">BHD 6.5</span></p>
+            <h3 class="mitem__name">Burrata &amp; heirloom tomato</h3>
+            <p class="mitem__desc">Torn burrata, heirloom tomatoes, basil oil, toasted pine nuts.</p>
+          </article>
+          <article class="mitem" data-item="2" data-kind="plate" data-file="media/plate-4.webp">
+            <p class="mitem__meta"><span class="mitem__tag">Salad</span><span class="mitem__price">BHD 4.5</span></p>
+            <h3 class="mitem__name">Fattoush</h3>
+            <p class="mitem__desc">Baby gem, radish, pomegranate, sumac, crisp pita, pomegranate molasses.</p>
+          </article>
+        <header class="mcat__head"><h2 class="mcat__title">From <em>the grill</em></h2></header>
+          <article class="mitem" data-item="3" data-kind="plate" data-file="media/plate-1.webp">
+            <p class="mitem__meta"><span class="mitem__tag">Signature</span><span class="mitem__price">BHD 9</span></p>
+            <h3 class="mitem__name">Seared tiger prawns</h3>
+            <p class="mitem__desc">Garlic-chilli butter, saffron aioli, charred lemon.</p>
+          </article>
+          <article class="mitem" data-item="4" data-kind="plate" data-file="media/plate-2.webp">
+            <p class="mitem__meta"><span class="mitem__tag">Vegetarian</span><span class="mitem__price">BHD 5.5</span></p>
+            <h3 class="mitem__name">Chargrilled asparagus</h3>
+            <p class="mitem__desc">Aged parmesan, brown butter, toasted almonds.</p>
+          </article>
+        <header class="mcat__head"><h2 class="mcat__title">Copper <em>pans</em></h2></header>
+          <article class="mitem" data-item="5" data-kind="photo" data-file="media/plate-pans.webp">
+            <p class="mitem__meta"><span class="mitem__tag">Sides</span><span class="mitem__price">BHD 3</span></p>
+            <h3 class="mitem__name">Sides for the table</h3>
+            <p class="mitem__desc">Served bubbling in copper, straight from the pass. Ask your host for tonight&rsquo;s selection.</p>
+          </article>
+      </section>
+
+      <!-- ============ THE BAR ============ -->
+      <section class="mcat" id="bar" data-cat="bar">
+        <header class="mcat__head"><p class="eyebrow">The Bar</p><h2 class="mcat__title">Spirits <em>&amp; pours</em></h2></header>
+          <article class="mitem" data-item="6" data-kind="glass" data-liquid="malt" data-ice="1">
+            <p class="mitem__meta"><span class="mitem__tag">Whisky</span><span class="mitem__price">BHD 8</span></p>
+            <h3 class="mitem__name">Single malt, over ice</h3>
+            <p class="mitem__desc">Poured over a hand-cut ice sphere in cut crystal.</p>
+          </article>
+          <article class="mitem" data-item="7" data-kind="glass" data-liquid="cognac">
+            <p class="mitem__meta"><span class="mitem__tag">Cognac</span><span class="mitem__price">BHD 7</span></p>
+            <h3 class="mitem__name">Cognac, neat</h3>
+            <p class="mitem__desc">Served at room temperature, warmed in the hand.</p>
+          </article>
+        <header class="mcat__head"><h2 class="mcat__title">Signature <em>cocktails</em></h2></header>
+          <article class="mitem" data-item="8" data-kind="glass" data-liquid="sour" data-foam="1">
+            <p class="mitem__meta"><span class="mitem__tag">House</span><span class="mitem__price">BHD 5.5</span></p>
+            <h3 class="mitem__name">The Hyde sour</h3>
+            <p class="mitem__desc">Ruby-red and finished with a silk foam.</p>
+          </article>
+        <header class="mcat__head"><h2 class="mcat__title">For <em>the table</em></h2></header>
+          <article class="mitem" data-item="9" data-kind="photo" data-file="media/pour-shots.jpg">
+            <p class="mitem__meta"><span class="mitem__tag">To share</span><span class="mitem__price">BHD 12</span></p>
+            <h3 class="mitem__name">Shots, served on a tray</h3>
+            <p class="mitem__desc">Brought out for the whole table, with citrus.</p>
+          </article>
+      </section>
+
+      <p class="mnote">Prices in Bahraini dinar, inclusive of VAT and service. Please tell your host about any allergies, and ask about tonight&rsquo;s specials.</p>
+    </div>
+  </main>
+  <script type="module" src="/src/js/menu/menu.js"></script>
+</body>
+</html>

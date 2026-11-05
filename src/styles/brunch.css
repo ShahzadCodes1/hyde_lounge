@@ -1,0 +1,175 @@
+/* ==========================================================================
+   BRUNCH — copy scrolling over a fixed 3D champagne tower.
+   hero → packages (pinned, the tower fills) → plates on the table
+   → the afternoon (close on the bubbles) → book Friday.
+   ========================================================================== */
+body[data-page='brunch'] { background: var(--bg); }
+
+.brunch-stage { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; }
+.brunch-veil, .brunch-dim { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0; }
+.brunch-veil {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--bg) 90%, transparent) 0%, color-mix(in srgb, var(--bg) 55%, transparent) 36%, transparent 56%);
+}
+.brunch-dim { background: color-mix(in srgb, var(--bg) 78%, transparent); }
+.brunch-page { position: relative; z-index: 1; }
+.brunch-page em { font-style: italic; color: var(--accent); }
+
+/* ---------- hero ---------- */
+.bhero {
+  position: relative;
+  min-height: 100vh; min-height: 100svh;
+  display: grid; align-items: center;
+  padding: var(--nav-h) var(--gutter) 5rem;
+}
+.bhero__copy { display: grid; gap: 1.3rem; justify-items: start; width: min(36rem, 42vw); }
+.bhero__copy .eyebrow { color: var(--accent); }
+.bhero__title { display: grid; font-family: var(--serif); font-weight: 300; font-size: var(--fs-mega); line-height: 0.94; letter-spacing: -0.02em; }
+.bhero__title [data-bhl] { display: inline-block; padding-right: 0.06em; }
+.bhero__lede { color: var(--text-dim); max-width: 32ch; }
+.bhero__cue {
+  position: absolute; bottom: calc(1.6rem + env(safe-area-inset-bottom)); left: var(--gutter);
+  display: inline-flex; align-items: center; gap: 0.8rem;
+  font-size: var(--fs-micro); letter-spacing: 0.24em; text-transform: uppercase; color: var(--text-dim);
+}
+.bhero__cue i { position: relative; width: 1px; height: 22px; background: var(--text-faint); overflow: hidden; }
+.bhero__cue i::after { content: ''; position: absolute; inset: 0; background: var(--accent); animation: scrollcue 2s var(--ease-inout) infinite; }
+
+/* ---------- packages ---------- */
+.bpack { position: relative; height: 380vh; }
+.bpack__sticky {
+  position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden;
+  display: flex; flex-direction: column; justify-content: space-between; gap: 1.6rem;
+  padding: calc(var(--nav-h) + 3vh) var(--gutter) calc(4vh + env(safe-area-inset-bottom));
+}
+.bpack__head { display: grid; gap: 0.6rem; width: min(30rem, 40vw); }
+.bpack__head .eyebrow { color: var(--accent); }
+.bpack__title { font-family: var(--serif); font-weight: 300; font-size: var(--fs-h2); line-height: 1; }
+.bpack__stack { display: grid; width: min(26rem, 36vw); }
+.bpkg {
+  grid-area: 1 / 1; position: relative;
+  display: grid; align-content: start; gap: 0.9rem;
+  visibility: hidden;
+}
+.bpkg__tier {
+  display: flex; justify-content: space-between; gap: 1rem; padding-bottom: 0.8rem; border-bottom: 1px solid var(--line);
+  font-size: var(--fs-micro); letter-spacing: 0.22em; text-transform: uppercase; color: var(--text-dim);
+}
+.bpkg__tier span:first-child { color: var(--accent); font-weight: 600; }
+.bpkg__name { font-family: var(--serif); font-style: italic; font-weight: 300; font-size: clamp(2.2rem, 3.6vw, 3.4rem); line-height: 1; }
+.bpkg__price { display: flex; align-items: flex-start; gap: 0.5rem; font-family: var(--serif); font-weight: 300; font-size: clamp(4rem, 7vw, 6.6rem); line-height: 0.85; color: var(--accent); font-variant-numeric: lining-nums; }
+.bpkg__price small { font-family: var(--sans); font-size: var(--fs-micro); letter-spacing: 0.24em; font-weight: 600; color: var(--text-dim); padding-top: 0.9em; }
+.bpkg__list { list-style: none; display: grid; gap: 0.45rem; padding-top: 0.3rem; color: var(--text-dim); }
+.bpkg__list li { position: relative; padding-left: 1.2rem; }
+.bpkg__list li::before { content: ''; position: absolute; left: 0; top: 0.72em; width: 0.6rem; height: 1px; background: var(--accent); }
+.bpack__ticks {
+  list-style: none; display: flex; gap: 0.5rem;
+}
+.bpack__ticks li {
+  width: 2.6rem; height: 2.6rem; display: grid; place-items: center;
+  border: 1px solid var(--line); border-radius: 50%;
+  font-family: var(--serif); font-size: 1rem; color: var(--text-dim);
+  transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease;
+}
+.bpack__ticks li.is-on { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+
+/* ---------- on the table ---------- */
+.btable { position: relative; padding: 22vh var(--gutter) 16vh; overflow-x: clip; }
+.btable__head { display: grid; gap: 0.8rem; justify-items: center; text-align: center; padding-bottom: 8vh; }
+.btable__head .eyebrow { color: var(--accent); }
+.btable__title { font-family: var(--serif); font-weight: 300; font-size: var(--fs-display); line-height: 0.95; }
+.btable__text { color: var(--text-dim); max-width: 36ch; }
+.btable__grid {
+  width: min(66rem, 100%); margin: 0 auto;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1.2rem, 4vw, 4rem) clamp(1rem, 3vw, 3rem);
+}
+.bplate { display: grid; gap: 1.4rem; justify-items: center; will-change: transform; }
+.bplate--lo { margin-top: 14vh; }
+.bplate img { width: 100%; height: auto; aspect-ratio: 1; object-fit: contain; filter: drop-shadow(0 30px 40px rgba(0, 0, 0, 0.55)); }
+.bplate--photo img { aspect-ratio: 4 / 5; object-fit: cover; border-radius: 16px; width: 82%; }
+.bplate figcaption { font-family: var(--serif); font-style: italic; font-size: 1.3rem; text-align: center; }
+
+/* ---------- the afternoon ---------- */
+.bday { position: relative; padding: 24vh var(--gutter) 18vh; }
+.bday__head { display: grid; gap: 0.8rem; width: min(30rem, 42vw); padding-bottom: 8vh; }
+.bday__head .eyebrow { color: var(--accent); }
+.bday__title { font-family: var(--serif); font-weight: 300; font-size: var(--fs-h2); line-height: 1; }
+.bday__list { list-style: none; width: min(34rem, 44vw); }
+.bstep {
+  min-height: 30vh;
+  display: grid; grid-template-columns: 6.2rem 1fr; align-content: center; gap: 1rem;
+  border-top: 1px solid var(--line);
+  opacity: 0.3; transition: opacity 0.7s var(--ease-out);
+}
+.bstep.is-active { opacity: 1; }
+.bstep__time { font-size: var(--fs-micro); letter-spacing: 0.22em; color: var(--accent); padding-top: 0.9em; font-variant-numeric: tabular-nums; }
+.bstep__what { display: grid; gap: 0.5rem; font-family: var(--serif); font-weight: 300; font-size: clamp(1.9rem, 3vw, 2.8rem); line-height: 1.05; }
+.bstep.is-active .bstep__what { font-style: italic; }
+.bstep__what small { font-family: var(--sans); font-style: normal; font-size: 0.92rem; line-height: 1.5; color: var(--text-dim); }
+
+/* ---------- book Friday ---------- */
+.bcta {
+  position: relative;
+  min-height: 92vh; min-height: 92svh;
+  display: grid; align-content: center; justify-items: start; gap: 1.3rem;
+  width: min(36rem, 44vw);
+  padding: 12vh var(--gutter) 16vh;
+}
+.bcta .eyebrow { color: var(--accent); }
+.bcta__title { font-family: var(--serif); font-weight: 300; font-size: var(--fs-display); line-height: 0.95; max-width: 12ch; }
+.bcta__text { color: var(--text-dim); max-width: 36ch; }
+.bcta__btns { display: flex; flex-wrap: wrap; gap: 0.8rem; padding-top: 0.6rem; }
+.bnote { padding-top: 4vh; font-size: var(--fs-small); color: var(--text-dim); opacity: 0.7; max-width: 42ch; }
+
+/* ---------- tablet (landscape) ---------- */
+@media (max-width: 1100px) and (min-aspect-ratio: 1/1) {
+  .bhero__copy { width: min(30rem, 44vw); }
+  .bpack__stack { width: min(24rem, 40vw); }
+}
+
+/* ---------- portrait: the tower sits up top, copy below ---------- */
+@media (max-aspect-ratio: 1/1) {
+  .brunch-veil { background: linear-gradient(to top, var(--bg) 0%, color-mix(in srgb, var(--bg) 90%, transparent) 40%, transparent 62%); }
+  .bhero { align-items: end; padding-bottom: 6.5rem; }
+  .bhero__copy { width: auto; gap: 1rem; }
+  .bhero__title { font-size: clamp(4rem, 19vw, 7.5rem); }
+
+  .bpack { height: 420vh; }
+  .bpack__sticky { justify-content: flex-end; gap: 1.1rem; }
+  .bpack__head { gap: 0.3rem; width: auto; }
+  .bpack__head .eyebrow { display: none; }
+  .bpack__title { font-size: clamp(1.7rem, 7vw, 2.4rem); }
+  .bpack__stack { width: 100%; }
+  .bpkg { gap: 0.6rem; }
+  .bpkg__name { font-size: 2rem; }
+  .bpkg__price { font-size: 3.4rem; position: absolute; right: 0; top: 2.5rem; }
+  .bpkg__list { font-size: 0.9rem; gap: 0.3rem; }
+  .bpack__ticks li { width: 2.2rem; height: 2.2rem; font-size: 0.9rem; }
+
+  .btable__grid { grid-template-columns: 1fr 1fr; }
+  .bplate--lo { margin-top: 8vh; }
+  .bplate figcaption { font-size: 1.05rem; }
+
+  .bday { padding-top: 40vh; }
+  .bday__head, .bday__list { width: auto; }
+  .bstep { min-height: 44vh; align-content: end; padding-bottom: 7vh; border-top: 0; grid-template-columns: 5rem 1fr; }
+  .bstep { opacity: calc(0.1 * var(--zone, 1)); transition: opacity 0.35s ease; }
+  .bstep.is-active { opacity: var(--zone, 1); }
+  .bday__head, .bpack__head, .bpack__stack, .bpack__ticks { opacity: var(--zone, 1); }
+  .bcta { opacity: var(--zone, 1); }
+  .bstep__what { font-size: clamp(1.7rem, 7.4vw, 2.3rem); }
+  .bcta { width: auto; align-content: end; min-height: 100svh; padding-bottom: 14vh; }
+}
+
+/* ---------- reduced motion: no pin, every package listed ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .bhero__cue i::after { animation: none; }
+  .bpack { height: auto; }
+  .bpack__sticky { position: relative; height: auto; overflow: visible; padding: 14vh var(--gutter) 10vh; display: grid; gap: 3rem; }
+  .bpack__head, .bpack__stack { width: auto; }
+  .bpack__stack { display: grid; gap: 3rem; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); }
+  .bpkg { grid-area: auto; visibility: visible; }
+  .bpkg__price { position: static; }
+  .bpack__ticks { display: none; }
+}
+
+@keyframes scrollcue { 0% { transform: translateY(-100%); } 60%, 100% { transform: translateY(100%); } }

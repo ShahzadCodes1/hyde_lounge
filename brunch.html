@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en" data-page="brunch">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#050d0b" />
+  <title>Friday Brunch — Hyde Lounge</title>
+  <meta name="description" content="Friday brunch at Hyde Lounge, Adliya: long tables, a live band and a champagne tower. Packages from BHD 20." />
+  <link rel="icon" type="image/svg+xml" href="/brand/favicon.svg" />
+  <script>
+    /* First paint — runs before anything is drawn (kept inline on purpose; same block on all five pages).
+       1. never restore an old scroll position: every load opens at the top
+       2. coming back after leaving the site (Back from another site, a reopened tab, a restored
+          browser session) starts over on the Home page, with the full intro
+       3. later pages in the same visit open with the transition curtain already closed */
+    (function (w, h) {
+      var s = null, AWAY = 3000, HOME = './', home = h.getAttribute('data-page') === 'home';
+      try { s = w.sessionStorage; } catch (e) {}
+      function get(k) { try { return s ? s.getItem(k) : null; } catch (e) { return null; } }
+      function set(k, v) { try { if (s) s.setItem(k, v); } catch (e) {} }
+      function del(k) { try { if (s) s.removeItem(k); } catch (e) {} }
+      function away() { var t = +get('hyde:left'); return !t || Date.now() - t > AWAY; }
+      function startOver() { del('hyde:seen'); if (home) w.location.reload(); else w.location.replace(HOME); }
+      try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch (e) {}
+      var nav = w.performance && performance.getEntriesByType ? performance.getEntriesByType('navigation')[0] : null;
+      if (nav && nav.type === 'back_forward' && away()) {
+        del('hyde:seen');
+        if (!home) { w.__hydeLeaving = true; h.className += ' hyde-quick'; w.location.replace(HOME); return; }
+      }
+      w.addEventListener('pagehide', function () { set('hyde:left', String(Date.now())); });
+      w.addEventListener('pageshow', function (e) { if (e.persisted) { if (away()) startOver(); else w.location.reload(); } });
+      if (get('hyde:seen') === '1' || (w.matchMedia && w.matchMedia('(prefers-reduced-motion: reduce)').matches)) h.className += ' hyde-quick';
+    })(window, document.documentElement);
+  </script>
+  <link rel="stylesheet" href="/src/styles/site.css" />
+  <link rel="stylesheet" href="/src/styles/brunch.css" />
+</head>
+<body data-page="brunch" class="is-loading">
+  <!-- The curtain is part of the page itself, so it is the very first thing painted. -->
+  <div class="loader" data-loader>
+    <div class="loader__panel"></div>
+    <div class="loader__inner">
+      <img class="loader__logo" src="/src/assets/hyde-logo.svg" alt="" />
+      <div class="loader__bar"><i></i></div>
+      <div class="loader__meta"><span>Bahrain</span><span class="loader__count" data-count>000</span></div>
+    </div>
+    <p class="loader__note" data-loader-note>Friday Brunch<small>Hyde Lounge</small></p>
+  </div>
+  <!-- a still of the scene's first frame, painted with the page; the live 3D fades in over it -->
+  <div class="brunch-stage stage-poster" data-poster="brunch" aria-hidden="true"></div>
+  <canvas class="brunch-stage" data-brunch-stage aria-hidden="true"></canvas>
+  <div class="brunch-veil" data-brunch-veil aria-hidden="true"></div>
+  <div class="brunch-dim" data-brunch-dim aria-hidden="true"></div>
+
+  <main class="brunch-page">
+    <!-- ============ HERO — the bottle is lifted ============ -->
+    <section class="bhero" data-bhero>
+      <div class="bhero__copy">
+        <p class="eyebrow" data-bh>Fridays · 1 PM – 5 PM</p>
+        <h1 class="bhero__title">
+          <span class="split-line"><span data-bhl>Friday</span></span>
+          <span class="split-line"><span data-bhl><em>Brunch.</em></span></span>
+        </h1>
+        <p class="bhero__lede" data-bh>Long tables, a live band, and a tower of champagne that never quite runs dry. Packages from BHD&nbsp;20.</p>
+      </div>
+      <span class="bhero__cue" data-bh><i></i>Scroll to pour</span>
+    </section>
+
+    <!-- ============ PACKAGES — pinned; the tower fills tier by tier ============ -->
+    <section class="bpack" data-bpack>
+      <div class="bpack__sticky">
+        <header class="bpack__head">
+          <p class="eyebrow">Packages</p>
+          <h2 class="bpack__title">Three ways <em>to brunch.</em></h2>
+        </header>
+        <div class="bpack__stack">
+          <article class="bpkg" data-pkg>
+            <p class="bpkg__tier"><span>Tier I</span><span>The top coupe</span></p>
+            <h3 class="bpkg__name">Soft</h3>
+            <p class="bpkg__price"><small>BHD</small>20</p>
+            <ul class="bpkg__list">
+              <li>The brunch spread and live stations</li>
+              <li>Mocktails, fresh juices and soft drinks</li>
+              <li>Live band from 2 PM</li>
+            </ul>
+          </article>
+          <article class="bpkg" data-pkg>
+            <p class="bpkg__tier"><span>Tier II</span><span>The middle four</span></p>
+            <h3 class="bpkg__name">Sparkling</h3>
+            <p class="bpkg__price"><small>BHD</small>30</p>
+            <ul class="bpkg__list">
+              <li>Everything in Soft</li>
+              <li>House sparkling, wine and beer</li>
+              <li>The Hyde signature cocktails</li>
+            </ul>
+          </article>
+          <article class="bpkg" data-pkg>
+            <p class="bpkg__tier"><span>Tier III</span><span>The whole tower</span></p>
+            <h3 class="bpkg__name">Champagne</h3>
+            <p class="bpkg__price"><small>BHD</small>45</p>
+            <ul class="bpkg__list">
+              <li>Everything in Sparkling</li>
+              <li>Free-flowing champagne</li>
+              <li>A reserved table by the stage</li>
+            </ul>
+          </article>
+        </div>
+        <ol class="bpack__ticks" aria-hidden="true"><li data-tick>I</li><li data-tick>II</li><li data-tick>III</li></ol>
+      </div>
+    </section>
+
+    <!-- ============ ON THE TABLE — plates that keep coming ============ -->
+    <section class="btable" data-btable>
+      <header class="btable__head">
+        <p class="eyebrow">On the table</p>
+        <h2 class="btable__title">Plates that <em>keep coming.</em></h2>
+        <p class="btable__text">Sharing plates from the kitchen all afternoon, brought to the table rather than queued for.</p>
+      </header>
+      <div class="btable__grid">
+        <figure class="bplate" data-plate data-spin="40"><img src="media/plate-1.webp" alt="Seared tiger prawns" loading="lazy" width="1024" height="1024" /><figcaption>Seared tiger prawns</figcaption></figure>
+        <figure class="bplate bplate--lo" data-plate data-spin="-30"><img src="media/plate-3.webp" alt="Burrata and heirloom tomato" loading="lazy" width="1024" height="1024" /><figcaption>Burrata &amp; heirloom tomato</figcaption></figure>
+        <figure class="bplate" data-plate data-spin="34"><img src="media/plate-5.webp" alt="Tuna tartare" loading="lazy" width="1024" height="1024" /><figcaption>Tuna tartare</figcaption></figure>
+        <figure class="bplate bplate--lo" data-plate data-spin="-36"><img src="media/plate-4.webp" alt="Fattoush" loading="lazy" width="1024" height="1024" /><figcaption>Fattoush</figcaption></figure>
+        <figure class="bplate" data-plate data-spin="28"><img src="media/plate-2.webp" alt="Chargrilled asparagus" loading="lazy" width="1024" height="1024" /><figcaption>Chargrilled asparagus</figcaption></figure>
+        <figure class="bplate bplate--photo bplate--lo" data-plate data-spin="0"><img src="media/plate-pans.webp" alt="Sides served in copper pans" loading="lazy" width="960" height="1200" /><figcaption>Sides, in copper</figcaption></figure>
+      </div>
+    </section>
+
+    <!-- ============ THE AFTERNOON — close on the bubbles ============ -->
+    <section class="bday" data-bday>
+      <header class="bday__head">
+        <p class="eyebrow">The afternoon</p>
+        <h2 class="bday__title">From first pour <em>to last song.</em></h2>
+      </header>
+      <ol class="bday__list">
+        <li class="bstep" data-step><span class="bstep__time">1:00 PM</span><span class="bstep__what">Doors, and the first pour<small>The tower is filled as the first tables sit down</small></span></li>
+        <li class="bstep" data-step><span class="bstep__time">2:00 PM</span><span class="bstep__what">The band takes the stage<small>Live sets through the afternoon</small></span></li>
+        <li class="bstep" data-step><span class="bstep__time">3:00 PM</span><span class="bstep__what">From the stations<small>The grill and the raw bar open</small></span></li>
+        <li class="bstep" data-step><span class="bstep__time">4:30 PM</span><span class="bstep__what">The DJ steps up<small>The room gets louder</small></span></li>
+        <li class="bstep" data-step><span class="bstep__time">5:00 PM</span><span class="bstep__what">Last pour, and the night begins<small><a class="link-u" href="live.html">See Friday night</a></small></span></li>
+      </ol>
+    </section>
+
+    <!-- ============ BOOK FRIDAY ============ -->
+    <section class="bcta" data-bcta>
+      <p class="eyebrow" data-bc>Book Friday</p>
+      <h2 class="bcta__title" data-bc>Friday, <em>one o&rsquo;clock.</em></h2>
+      <p class="bcta__text" data-bc>Tables for two to twenty. Fridays fill early in the week, so book ahead.</p>
+      <div class="bcta__btns" data-bc>
+        <a class="btn" href="reserve.html"><span class="dot"></span>Book brunch</a>
+        <a class="btn btn--ghost" href="https://wa.me/97366655099" target="_blank" rel="noopener">WhatsApp us</a>
+      </div>
+      <p class="bnote" data-bc>Packages, prices and timings shown for preview. Over-21s for alcoholic packages; please drink responsibly.</p>
+    </section>
+  </main>
+  <script type="module" src="/src/js/brunch/brunch.js"></script>
+</body>
+</html>

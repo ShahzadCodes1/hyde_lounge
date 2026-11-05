@@ -1,0 +1,226 @@
+/* ==========================================================================
+   LIVE NIGHTS — copy scrolling over a fixed 3D turntable.
+   hero → the week (pinned, nights slide across) → on stage (needle close-up)
+   → footage over the spinning record → tonight.
+   ========================================================================== */
+body[data-page='live'] { background: var(--stage); }
+
+.live-stage { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; }
+.live-veil, .live-dim { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0; }
+.live-veil {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--stage) 90%, transparent) 0%, color-mix(in srgb, var(--stage) 55%, transparent) 36%, transparent 56%);
+}
+.live-dim { background: color-mix(in srgb, var(--stage) 62%, transparent); }
+.live-page { position: relative; z-index: 1; }
+.live-page em { font-style: italic; color: var(--accent); }
+
+/* ---------- hero ---------- */
+.lhero {
+  position: relative;
+  min-height: 100vh; min-height: 100svh;
+  display: grid; align-items: center;
+  padding: var(--nav-h) var(--gutter) 5rem;
+}
+.lhero__copy { display: grid; gap: 1.3rem; justify-items: start; width: min(34rem, 40vw); }
+.lhero__copy .eyebrow { color: var(--accent); }
+.lhero__title {
+  display: grid;
+  font-family: var(--serif); font-weight: 300;
+  font-size: var(--fs-mega); line-height: 0.94; letter-spacing: -0.02em;
+}
+.lhero__title [data-lhl] { display: inline-block; padding-right: 0.06em; }
+.lhero__lede { color: var(--text-dim); max-width: 32ch; }
+
+/* the little "now playing" equaliser */
+.lhero__now {
+  position: absolute; right: var(--gutter); bottom: calc(1.6rem + env(safe-area-inset-bottom));
+  display: inline-flex; align-items: flex-end; gap: 3px;
+  font-size: var(--fs-micro); letter-spacing: 0.22em; text-transform: uppercase; color: var(--text-dim);
+}
+.lhero__now i { width: 2px; height: 14px; background: var(--accent); transform-origin: bottom; transform: scaleY(0.25); }
+.lhero__now span { margin-left: 0.7rem; }
+.lhero__now b { font-weight: 600; color: var(--text); }
+body.is-playing .lhero__now i { animation: eq 0.9s ease-in-out infinite alternate; }
+body.is-playing .lhero__now i:nth-child(2) { animation-duration: 0.7s; animation-delay: -0.3s; }
+body.is-playing .lhero__now i:nth-child(3) { animation-duration: 1.1s; animation-delay: -0.5s; }
+body.is-playing .lhero__now i:nth-child(4) { animation-duration: 0.8s; animation-delay: -0.2s; }
+@keyframes eq { from { transform: scaleY(0.2); } to { transform: scaleY(1); } }
+
+.lhero__cue {
+  position: absolute; bottom: calc(1.6rem + env(safe-area-inset-bottom)); left: var(--gutter);
+  display: inline-flex; align-items: center; gap: 0.8rem;
+  font-size: var(--fs-micro); letter-spacing: 0.24em; text-transform: uppercase; color: var(--text-dim);
+}
+.lhero__cue i { position: relative; width: 1px; height: 22px; background: var(--text-faint); overflow: hidden; }
+.lhero__cue i::after { content: ''; position: absolute; inset: 0; background: var(--accent); animation: scrollcue 2s var(--ease-inout) infinite; }
+
+/* ---------- the week ---------- */
+.lweek { position: relative; height: 460vh; }
+.lweek__sticky { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; }
+.lweek__head { position: absolute; left: var(--gutter); top: calc(var(--nav-h) + 3vh); display: grid; gap: 0.6rem; }
+.lweek__head .eyebrow { color: var(--accent); }
+.lweek__title { font-family: var(--serif); font-weight: 300; font-size: var(--fs-h2); line-height: 1; max-width: 12ch; }
+.lweek__count {
+  position: absolute; left: var(--gutter); bottom: calc(4vh + 1.2rem);
+  font-size: var(--fs-micro); letter-spacing: 0.24em; color: var(--text-dim); font-variant-numeric: tabular-nums;
+}
+.lweek__count span { color: var(--text); }
+.lweek__rail { position: absolute; left: 0; right: 0; bottom: calc(4vh + 3.4rem); }
+.lweek__track { display: flex; gap: 1.1rem; padding: 0 var(--gutter); width: max-content; will-change: transform; }
+.lweek__progress { position: absolute; left: var(--gutter); right: var(--gutter); bottom: 4vh; height: 1px; background: var(--line); }
+.lweek__progress i { position: absolute; inset: 0; background: var(--accent); transform-origin: left; transform: scaleX(0); }
+
+.lnight {
+  --hue: var(--accent);
+  position: relative;
+  width: clamp(16.5rem, 23vw, 21rem);
+  display: grid; gap: 0.75rem; align-content: start;
+  padding: 1.4rem 1.4rem 1.3rem;
+  border: 1px solid var(--line); border-radius: 18px;
+  background: color-mix(in srgb, var(--stage) 58%, transparent);
+  backdrop-filter: blur(14px) saturate(1.1); -webkit-backdrop-filter: blur(14px) saturate(1.1);
+  opacity: 0.55;
+  transition: opacity 0.6s var(--ease-out), border-color 0.6s var(--ease-out), transform 0.6s var(--ease-out);
+}
+.lnight::before { /* the night's colour, a short bar along the top edge */
+  content: ''; position: absolute; left: 1.4rem; top: -1px; width: 2.4rem; height: 2px;
+  background: var(--hue); transition: width 0.6s var(--ease-out);
+}
+.lnight.is-current { opacity: 1; border-color: color-mix(in srgb, var(--hue) 60%, transparent); transform: translateY(-6px); }
+.lnight.is-current::before { width: calc(100% - 2.8rem); }
+.lnight__day {
+  display: flex; justify-content: space-between; gap: 1rem;
+  font-size: var(--fs-micro); letter-spacing: 0.22em; text-transform: uppercase; color: var(--text-dim);
+}
+.lnight__day span:first-child { color: var(--hue); font-weight: 600; }
+.lnight__name { font-family: var(--serif); font-weight: 300; font-size: clamp(1.9rem, 2.6vw, 2.5rem); line-height: 1; }
+.lnight__name em { color: var(--text); }
+.lnight.is-current .lnight__name em { color: var(--hue); }
+.lnight__what { color: var(--text-dim); font-size: 0.92rem; line-height: 1.5; }
+.lnight__tag { font-size: var(--fs-micro); letter-spacing: 0.2em; text-transform: uppercase; color: var(--text); padding-top: 0.6rem; border-top: 1px solid var(--line); }
+
+/* ---------- on stage ---------- */
+.lstage { position: relative; padding: 24vh var(--gutter) 18vh; }
+.lstage__head { display: grid; gap: 0.9rem; width: min(30rem, 42vw); padding-bottom: 10vh; }
+.lstage__head .eyebrow { color: var(--accent); }
+.lstage__title { font-family: var(--serif); font-weight: 300; font-size: var(--fs-h2); line-height: 1; }
+.lstage__text { color: var(--text-dim); max-width: 34ch; }
+.lartists { list-style: none; width: min(44rem, 50vw); }
+.lartist {
+  min-height: 38vh;
+  display: grid; align-content: center;
+  grid-template-columns: 2.2rem auto 1fr; grid-template-areas: 'num photo name' 'num photo tag';
+  column-gap: 1.4rem; row-gap: 0.6rem;
+  border-top: 1px solid var(--line);
+  padding: 3vh 0;
+  opacity: 0.32;
+  transition: opacity 0.7s var(--ease-out);
+}
+.lartist.is-active { opacity: 1; }
+.lartist__num { grid-area: num; font-size: var(--fs-micro); letter-spacing: 0.2em; color: var(--accent); padding-top: 0.4em; font-variant-numeric: tabular-nums; }
+/* an arched portrait with a brass hairline; it comes into colour when the name is on stage */
+.lartist__photo {
+  grid-area: photo; position: relative; display: block;
+  width: clamp(7.5rem, 12vw, 13rem); aspect-ratio: 4 / 5;
+  border-radius: 999px 999px 14px 14px; overflow: hidden;
+  background: #000;
+  transform: scale(0.94); transition: transform 0.9s var(--ease-out);
+}
+.lartist__photo img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(1) brightness(0.7); transform: scale(1.08); transition: filter 0.9s var(--ease-out), transform 1.4s var(--ease-out); }
+.lartist__photo::after { content: ''; position: absolute; inset: 5px; border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent); border-radius: 999px 999px 10px 10px; pointer-events: none; }
+.lartist.is-active .lartist__photo { transform: scale(1); }
+.lartist.is-active .lartist__photo img { filter: none; transform: scale(1); }
+.lartist__photo--venue img { object-position: 50% 40%; }
+.lartist__name { grid-area: name; align-self: end; font-family: var(--serif); font-weight: 300; font-size: clamp(2.1rem, 3.6vw, 3.8rem); line-height: 1; letter-spacing: -0.01em; }
+.lartist.is-active .lartist__name { font-style: italic; }
+.lartist__tag { grid-area: tag; align-self: start; font-size: var(--fs-micro); letter-spacing: 0.24em; text-transform: uppercase; color: var(--text-dim); }
+
+/* ---------- from the floor ---------- */
+.lfilm { position: relative; padding: 20vh var(--gutter) 12vh; }
+.lfilm__head { display: grid; gap: 0.7rem; justify-items: center; text-align: center; padding-bottom: 10vh; }
+.lfilm__head .eyebrow { color: var(--accent); }
+.lfilm__title { font-family: var(--serif); font-weight: 300; font-size: var(--fs-display); line-height: 0.95; }
+.lfilm__grid {
+  width: min(62rem, 100%); margin: 0 auto;
+  display: grid; grid-template-columns: 1fr 1fr; gap: clamp(1rem, 4vw, 4rem); align-items: start;
+}
+.lclip { display: grid; gap: 0.8rem; will-change: transform; }
+.lclip--b { margin-top: 18vh; }
+.lclip--c { margin-top: -14vh; width: 82%; justify-self: end; }
+.lclip--d { margin-top: 8vh; width: 88%; }
+.lclip__media { position: relative; aspect-ratio: 4 / 5; border-radius: 16px; overflow: hidden; background: #000; }
+.lclip--tall .lclip__media { aspect-ratio: 9 / 14; }
+.lclip__media video { width: 100%; height: 100%; object-fit: cover; transform: scale(1.06); transition: transform 1.4s var(--ease-out); }
+.lclip.is-in .lclip__media video { transform: scale(1); }
+.lclip__media::after { content: ''; position: absolute; inset: 8px; border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); border-radius: 11px; pointer-events: none; }
+.lclip figcaption { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; padding: 0 0.2rem; }
+.lclip figcaption span { font-family: var(--serif); font-style: italic; font-size: 1.3rem; }
+.lclip figcaption small { font-size: var(--fs-micro); letter-spacing: 0.22em; text-transform: uppercase; color: var(--accent); }
+
+/* ---------- tonight ---------- */
+.lcta {
+  position: relative;
+  min-height: 92vh; min-height: 92svh;
+  display: grid; align-content: center; justify-items: center; gap: 1.3rem;
+  text-align: center;
+  padding: 12vh var(--gutter) 16vh;
+}
+.lcta .eyebrow { color: var(--accent); }
+.lcta__title { font-family: var(--serif); font-weight: 300; font-size: var(--fs-display); line-height: 0.95; max-width: 12ch; }
+.lcta__text { color: var(--text-dim); max-width: 36ch; }
+.lcta__btns { display: flex; flex-wrap: wrap; gap: 0.8rem; justify-content: center; padding-top: 0.6rem; }
+.lnote { padding-top: 4vh; font-size: var(--fs-small); color: var(--text-dim); opacity: 0.7; max-width: 40ch; }
+
+/* ---------- tablet (landscape) ---------- */
+@media (max-width: 1100px) and (min-aspect-ratio: 1/1) {
+  .lhero__copy { width: min(30rem, 44vw); }
+  .lweek__title { font-size: clamp(2rem, 4vw, 3rem); }
+}
+
+/* ---------- portrait: the deck sits up top, copy below ---------- */
+@media (max-aspect-ratio: 1/1) {
+  .live-veil { background: linear-gradient(to top, var(--stage) 0%, color-mix(in srgb, var(--stage) 90%, transparent) 38%, transparent 60%); }
+  .lhero { align-items: end; padding-bottom: 6.5rem; }
+  .lhero__copy { width: auto; gap: 1rem; }
+  .lhero__title { font-size: clamp(4.2rem, 21vw, 8rem); }
+  .lhero__now span { display: none; }
+
+  .lweek { height: 520vh; }
+  .lweek__head { top: calc(var(--nav-h) + 1vh); gap: 0.4rem; }
+  .lweek__title { font-size: clamp(1.8rem, 7.4vw, 2.6rem); max-width: none; }
+  .lweek__rail { bottom: calc(3.5vh + 3rem); }
+  .lnight { width: min(78vw, 21rem); padding: 1.15rem 1.15rem 1.05rem; gap: 0.6rem; }
+  .lnight__name { font-size: 1.9rem; }
+  .lnight__what { font-size: 0.86rem; }
+  .lweek__count { bottom: calc(3.5vh + 1rem); }
+  .lweek__progress { bottom: 3.5vh; }
+
+  .lstage { padding-top: 40vh; }
+  .lstage__head { width: auto; }
+  .lartists { width: auto; }
+  .lartist { min-height: 46vh; align-content: end; padding-bottom: 7vh; border-top: 0; }
+  .lartist__name { font-size: clamp(1.7rem, 7.6vw, 2.6rem); }
+  .lartist { grid-template-columns: 1.8rem auto 1fr; column-gap: 1rem; padding: 0 0 7vh; }
+  .lartist__photo { width: clamp(5.6rem, 26vw, 7.5rem); }
+  .lartist { opacity: calc(0.1 * var(--zone, 1)); transition: opacity 0.35s ease; }
+  .lartist.is-active { opacity: var(--zone, 1); }
+  .lstage__head { opacity: var(--zone, 1); }
+
+  .lfilm__grid { gap: 0.9rem; }
+  .lclip figcaption { flex-direction: column; gap: 0.15rem; }
+  .lclip figcaption span { font-size: 1.05rem; }
+}
+
+/* ---------- reduced motion: no pin, the week becomes a grid ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .lhero__cue i::after, body.is-playing .lhero__now i { animation: none; }
+  .lweek { height: auto; }
+  .lweek__sticky { position: relative; height: auto; overflow: visible; padding: 14vh 0 10vh; }
+  .lweek__head, .lweek__rail { position: relative; inset: auto; }
+  .lweek__head { padding: 0 var(--gutter) 2rem; }
+  .lweek__track { width: auto; flex-wrap: wrap; }
+  .lweek__count, .lweek__progress { display: none; }
+  .lnight { opacity: 1; }
+}
+
+@keyframes scrollcue { 0% { transform: translateY(-100%); } 60%, 100% { transform: translateY(100%); } }

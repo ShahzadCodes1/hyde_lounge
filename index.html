@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en" data-page="home">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#050d0b" />
+  <title>Hyde Lounge — After Dark in Adliya, Bahrain</title>
+  <meta name="description" content="Hyde Lounge — cocktails, kitchen and live music after dark in Adliya, Bahrain. Daily 8 PM – 2:30 AM." />
+  <link rel="icon" type="image/svg+xml" href="/brand/favicon.svg" />
+  <script>
+    /* First paint — runs before anything is drawn (kept inline on purpose; same block on all five pages).
+       1. never restore an old scroll position: every load opens at the top
+       2. coming back after leaving the site (Back from another site, a reopened tab, a restored
+          browser session) starts over on the Home page, with the full intro
+       3. later pages in the same visit open with the transition curtain already closed */
+    (function (w, h) {
+      var s = null, AWAY = 3000, HOME = './', home = h.getAttribute('data-page') === 'home';
+      try { s = w.sessionStorage; } catch (e) {}
+      function get(k) { try { return s ? s.getItem(k) : null; } catch (e) { return null; } }
+      function set(k, v) { try { if (s) s.setItem(k, v); } catch (e) {} }
+      function del(k) { try { if (s) s.removeItem(k); } catch (e) {} }
+      function away() { var t = +get('hyde:left'); return !t || Date.now() - t > AWAY; }
+      function startOver() { del('hyde:seen'); if (home) w.location.reload(); else w.location.replace(HOME); }
+      try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch (e) {}
+      var nav = w.performance && performance.getEntriesByType ? performance.getEntriesByType('navigation')[0] : null;
+      if (nav && nav.type === 'back_forward' && away()) {
+        del('hyde:seen');
+        if (!home) { w.__hydeLeaving = true; h.className += ' hyde-quick'; w.location.replace(HOME); return; }
+      }
+      w.addEventListener('pagehide', function () { set('hyde:left', String(Date.now())); });
+      w.addEventListener('pageshow', function (e) { if (e.persisted) { if (away()) startOver(); else w.location.reload(); } });
+      if (get('hyde:seen') === '1' || (w.matchMedia && w.matchMedia('(prefers-reduced-motion: reduce)').matches)) h.className += ' hyde-quick';
+    })(window, document.documentElement);
+  </script>
+  <link rel="stylesheet" href="/src/styles/site.css" />
+  <link rel="stylesheet" href="/src/styles/home.css" />
+  <link rel="stylesheet" href="/src/styles/pour.css" />
+  <link rel="stylesheet" href="/src/styles/plate.css" />
+  <link rel="stylesheet" href="/src/styles/play.css" />
+</head>
+<body data-page="home" class="is-loading">
+  <!-- The curtain is part of the page itself, so it is the very first thing painted. -->
+  <div class="loader" data-loader>
+    <div class="loader__panel"></div>
+    <div class="loader__inner">
+      <img class="loader__logo" src="/src/assets/hyde-logo.svg" alt="" />
+      <div class="loader__bar"><i></i></div>
+      <div class="loader__meta"><span>Bahrain</span><span class="loader__count" data-count>000</span></div>
+    </div>
+    <p class="loader__note" data-loader-note>Hyde Lounge<small>Adliya · Bahrain</small></p>
+  </div>
+  <main>
+    <!-- ============ HERO — the ring ============ -->
+    <section class="hero" data-hero>
+      <div class="hero__sticky">
+        <!-- a still of the scene's first frame, painted with the page; the live 3D fades in over it -->
+        <div class="hero__canvas stage-poster" data-poster="home" aria-hidden="true"></div>
+        <canvas class="hero__canvas" data-hero-canvas aria-hidden="true"></canvas>
+        <div class="hero__fallback" aria-hidden="true"></div>
+        <div class="hero__veil" aria-hidden="true"></div>
+
+        <div class="hero__content" data-hero-content>
+          <div class="hero__left">
+            <p class="eyebrow hero__eyebrow" data-reveal>Lounge · Kitchen · Live Music</p>
+            <h1 class="hero__title">
+              <span class="split-line"><span data-line>Where the night</span></span>
+              <span class="split-line"><span data-line><em>finds its rhythm.</em></span></span>
+            </h1>
+          </div>
+          <div class="hero__right">
+            <p class="hero__lede" data-reveal>Cocktails poured with theatre, a kitchen made for sharing, and live Arabic nights under the glow of the ring.</p>
+            <div class="hero__ctas" data-reveal>
+              <a class="btn" href="reserve.html"><span class="dot"></span>Reserve a table</a>
+              <a class="btn btn--ghost" href="menu.html">Explore the menu</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero__meta" data-hero-meta>
+          <span data-reveal>Daily 8 PM – 2:30 AM</span>
+          <span class="hero__scroll" data-reveal><i></i>Scroll to enter</span>
+          <span data-reveal>Adliya · Block 338</span>
+        </div>
+
+        <!-- hand-off to chapter 01 (appears as the camera passes through the ring) -->
+        <div class="chapter-card" data-chapter aria-hidden="true">
+          <p class="eyebrow">Chapter 01 — The Bar</p>
+          <p class="chapter-card__word"><span class="split-line"><span data-chapter-word>Pour.</span></span></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CHAPTER 01 — POUR (the bar) ============ -->
+    <section class="pour" data-pour aria-labelledby="pour-title">
+      <div class="pour__sticky">
+        <canvas class="pour__canvas" data-pour-canvas aria-hidden="true"></canvas>
+        <div class="pour__veil" aria-hidden="true"></div>
+
+        <!-- opening frame: identical to the hero's last frame, so the hand-off is invisible -->
+        <div class="chapter-card" data-pour-intro aria-hidden="true">
+          <p class="eyebrow">Chapter 01 — The Bar</p>
+          <p class="chapter-card__word"><span class="split-line"><span>Pour.</span></span></p>
+        </div>
+
+        <div class="pour__copy">
+          <p class="eyebrow" data-pr>Chapter 01 — The Bar</p>
+          <h2 class="pour__title" id="pour-title">
+            <span class="split-line"><span data-pl>Poured with</span></span>
+            <span class="split-line"><span data-pl><em>theatre.</em></span></span>
+          </h2>
+          <p class="pour__text" data-pr>Single malts poured over hand-cut ice, cognac served from crystal, and signature sours under silk foam. Every glass at Hyde is made to be watched.</p>
+          <ul class="pour__notes" data-pr>
+            <li><span>Whisky</span>neat or over ice</li>
+            <li><span>Cognac</span>poured from crystal</li>
+            <li><span>Sours</span>finished with foam</li>
+          </ul>
+          <a class="btn btn--ghost" href="menu.html" data-pr>See the bar list</a>
+        </div>
+
+        <div class="pour__cards">
+          <figure class="pour-card pour-card--a" data-card>
+            <div class="pour-card__media"><video muted loop playsinline preload="none" poster="/media/pour-bar.jpg" data-src="/media/pour-bar.mp4"></video></div>
+            <figcaption><span>Signature sours</span><small>Foam · cherries</small></figcaption>
+          </figure>
+          <figure class="pour-card pour-card--b" data-card>
+            <div class="pour-card__media"><img src="/media/pour-bartender.jpg" alt="A bartender pouring a stirred cocktail at the Hyde bar" loading="lazy" width="480" height="478" /></div>
+            <figcaption><span>Stirred to order</span><small>At the bar</small></figcaption>
+          </figure>
+          <figure class="pour-card pour-card--c" data-card>
+            <div class="pour-card__media"><video muted loop playsinline preload="none" poster="/media/pour-toast.jpg" data-src="/media/pour-toast.mp4"></video></div>
+            <figcaption><span>Raise a glass</span><small>Nightly from 8 PM</small></figcaption>
+          </figure>
+        </div>
+
+        <!-- liquid wipe into chapter 02 -->
+        <svg class="pour__wipe" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <path class="pour__wipe-liquid" data-wipe-a d="M0 100 L100 100 Z" />
+          <path class="pour__wipe-night" data-wipe-b d="M0 100 L100 100 Z" />
+        </svg>
+        <div class="chapter-card chapter-card--next" data-pour-next aria-hidden="true">
+          <p class="eyebrow">Chapter 02 — The Kitchen</p>
+          <p class="chapter-card__word"><span class="split-line"><span data-next-word>Plate.</span></span></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CHAPTER 02 — PLATE (the kitchen) ============ -->
+    <section class="plate" data-plate aria-labelledby="plate-title">
+      <div class="plate__sticky">
+        <canvas class="plate__canvas" data-plate-canvas aria-hidden="true"></canvas>
+        <div class="plate__veil" aria-hidden="true"></div>
+
+        <!-- opening frame: identical to the end of Chapter 01 -->
+        <div class="chapter-card chapter-card--next" data-plate-intro aria-hidden="true">
+          <p class="eyebrow">Chapter 02 — The Kitchen</p>
+          <p class="chapter-card__word"><span class="split-line"><span>Plate.</span></span></p>
+        </div>
+
+        <div class="plate__copy">
+          <p class="eyebrow" data-qr>Chapter 02 — The Kitchen</p>
+          <h2 class="plate__title" id="plate-title">
+            <span class="split-line"><span data-ql>Made for</span></span>
+            <span class="split-line"><span data-ql><em>the table.</em></span></span>
+          </h2>
+          <p class="plate__text" data-qr>From the grill, the sea and the raw bar: plates built to share, sent out one after another until the table is full.</p>
+          <ol class="plate__courses" data-qr>
+            <li data-course="0"><span class="plate__num">01</span><span class="plate__dish">Seared tiger prawns<small>Garlic-chilli butter · saffron aioli</small></span></li>
+            <li data-course="1"><span class="plate__num">02</span><span class="plate__dish">Chargrilled asparagus<small>Aged parmesan · brown butter</small></span></li>
+            <li data-course="2"><span class="plate__num">03</span><span class="plate__dish">Burrata &amp; heirloom tomato<small>Basil oil · toasted pine nuts</small></span></li>
+            <li data-course="3"><span class="plate__num">04</span><span class="plate__dish">Fattoush<small>Pomegranate · sumac · crisp pita</small></span></li>
+            <li data-course="4"><span class="plate__num">05</span><span class="plate__dish">Tuna tartare<small>Avocado · ponzu · micro greens</small></span></li>
+          </ol>
+          <a class="btn btn--ghost" href="menu.html" data-qr>Explore the kitchen menu</a>
+        </div>
+
+        <div class="plate__cards">
+          <figure class="pour-card plate-feature plate-card--a" data-qcard>
+            <div class="pour-card__media"><img src="/media/plate-pans.webp" alt="Copper pans of sides on the Hyde table" loading="lazy" width="960" height="1200" /></div>
+            <figcaption><span>Copper-pan sides</span><small>Served bubbling</small></figcaption>
+          </figure>
+          <figure class="pour-card plate-feature plate-card--b" data-qcard>
+            <div class="pour-card__media"><img src="/media/plate-tartare.webp" alt="A tartare plated at Hyde" loading="lazy" width="960" height="1200" /></div>
+            <figcaption><span>From the raw bar</span><small>Plated to order</small></figcaption>
+          </figure>
+        </div>
+
+        <!-- lights-down iris into chapter 03 -->
+        <div class="plate__iris" data-iris aria-hidden="true"></div>
+        <div class="chapter-card chapter-card--stage" data-plate-next aria-hidden="true">
+          <p class="eyebrow">Chapter 03 — The Stage</p>
+          <p class="chapter-card__word"><span class="split-line"><span data-next-word>Play.</span></span></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CHAPTER 03 — PLAY (the stage) ============ -->
+    <section class="play" data-play aria-labelledby="play-title">
+      <div class="play__sticky">
+        <canvas class="play__canvas" data-play-canvas aria-hidden="true"></canvas>
+        <div class="play__veil" aria-hidden="true"></div>
+
+        <!-- opening frame: identical to the end of Chapter 02 -->
+        <div class="chapter-card chapter-card--stage" data-play-intro aria-hidden="true">
+          <p class="eyebrow">Chapter 03 — The Stage</p>
+          <p class="chapter-card__word"><span class="split-line"><span>Play.</span></span></p>
+        </div>
+
+        <div class="play__copy">
+          <p class="eyebrow" data-yr>Chapter 03 — The Stage</p>
+          <h2 class="play__title" id="play-title">
+            <span class="split-line"><span data-yl>Nights with</span></span>
+            <span class="split-line"><span data-yl><em>a pulse.</em></span></span>
+          </h2>
+          <p class="play__text" data-yr>Arabic stars live on stage, Hyde Bazaar every Monday, and DJs under the ring until 2:30 AM.</p>
+          <ul class="play__week" data-yr>
+            <li><span class="play__day">Mondays</span><span class="play__what">Hyde Bazaar<small>Ladies night · Arabic live band · 8 PM till late</small></span></li>
+            <li><span class="play__day">Live</span><span class="play__what">Stars on stage<small>Eslam Elmallah · Hatim Ammor · Yousif Al Sumaidi · Abdulrhman Alazzawi</small></span></li>
+            <li><span class="play__day">Nightly</span><span class="play__what">DJs under the ring<small>8 PM – 2:30 AM</small></span></li>
+          </ul>
+          <a class="btn btn--ghost" href="live.html" data-yr>See what&rsquo;s on</a>
+        </div>
+
+        <div class="play__cards">
+          <figure class="pour-card play-card play-card--a" data-ycard>
+            <div class="pour-card__media"><video muted loop playsinline preload="none" poster="/media/play-ring.jpg" data-src="/media/play-ring.mp4"></video></div>
+            <figcaption><span>Under the ring</span><small>Resident DJs</small></figcaption>
+          </figure>
+          <figure class="pour-card play-card play-card--b" data-ycard>
+            <div class="pour-card__media"><video muted loop playsinline preload="none" poster="/media/play-crowd.jpg" data-src="/media/play-crowd.mp4"></video></div>
+            <figcaption><span>Till 2:30 AM</span><small>Every night</small></figcaption>
+          </figure>
+          <figure class="pour-card play-card play-card--poster play-card--c" data-ycard>
+            <div class="pour-card__media"><video muted loop playsinline preload="none" poster="/media/play-bazaar.jpg" data-src="/media/play-bazaar.mp4"></video></div>
+            <figcaption><span>Hyde Bazaar</span><small>Mondays</small></figcaption>
+          </figure>
+          <figure class="pour-card play-card play-card--d" data-ycard>
+            <div class="pour-card__media"><video muted loop playsinline preload="none" poster="/media/play-room.jpg" data-src="/media/play-room.mp4"></video></div>
+            <figcaption><span>The room</span><small>Adliya</small></figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script type="module" src="/src/js/home/home.js"></script>
+</body>
+</html>

@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en" data-page="live">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#010302" />
+  <title>Live Nights — Hyde Lounge</title>
+  <meta name="description" content="Live music every night at Hyde Lounge, Adliya: Hyde Bazaar on Mondays, Arabic stars on stage and DJs under the ring until 2:30 AM." />
+  <link rel="icon" type="image/svg+xml" href="/brand/favicon.svg" />
+  <script>
+    /* First paint — runs before anything is drawn (kept inline on purpose; same block on all five pages).
+       1. never restore an old scroll position: every load opens at the top
+       2. coming back after leaving the site (Back from another site, a reopened tab, a restored
+          browser session) starts over on the Home page, with the full intro
+       3. later pages in the same visit open with the transition curtain already closed */
+    (function (w, h) {
+      var s = null, AWAY = 3000, HOME = './', home = h.getAttribute('data-page') === 'home';
+      try { s = w.sessionStorage; } catch (e) {}
+      function get(k) { try { return s ? s.getItem(k) : null; } catch (e) { return null; } }
+      function set(k, v) { try { if (s) s.setItem(k, v); } catch (e) {} }
+      function del(k) { try { if (s) s.removeItem(k); } catch (e) {} }
+      function away() { var t = +get('hyde:left'); return !t || Date.now() - t > AWAY; }
+      function startOver() { del('hyde:seen'); if (home) w.location.reload(); else w.location.replace(HOME); }
+      try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch (e) {}
+      var nav = w.performance && performance.getEntriesByType ? performance.getEntriesByType('navigation')[0] : null;
+      if (nav && nav.type === 'back_forward' && away()) {
+        del('hyde:seen');
+        if (!home) { w.__hydeLeaving = true; h.className += ' hyde-quick'; w.location.replace(HOME); return; }
+      }
+      w.addEventListener('pagehide', function () { set('hyde:left', String(Date.now())); });
+      w.addEventListener('pageshow', function (e) { if (e.persisted) { if (away()) startOver(); else w.location.reload(); } });
+      if (get('hyde:seen') === '1' || (w.matchMedia && w.matchMedia('(prefers-reduced-motion: reduce)').matches)) h.className += ' hyde-quick';
+    })(window, document.documentElement);
+  </script>
+  <link rel="stylesheet" href="/src/styles/site.css" />
+  <link rel="stylesheet" href="/src/styles/live.css" />
+</head>
+<body data-page="live" class="is-loading">
+  <!-- The curtain is part of the page itself, so it is the very first thing painted. -->
+  <div class="loader" data-loader>
+    <div class="loader__panel"></div>
+    <div class="loader__inner">
+      <img class="loader__logo" src="/src/assets/hyde-logo.svg" alt="" />
+      <div class="loader__bar"><i></i></div>
+      <div class="loader__meta"><span>Bahrain</span><span class="loader__count" data-count>000</span></div>
+    </div>
+    <p class="loader__note" data-loader-note>Live Nights<small>Hyde Lounge</small></p>
+  </div>
+  <!-- a still of the scene's first frame, painted with the page; the live 3D fades in over it -->
+  <div class="live-stage stage-poster" data-poster="live" aria-hidden="true"></div>
+  <canvas class="live-stage" data-live-stage aria-hidden="true"></canvas>
+  <div class="live-veil" data-live-veil aria-hidden="true"></div>
+  <div class="live-dim" data-live-dim aria-hidden="true"></div>
+
+  <main class="live-page">
+    <!-- ============ HERO — the deck, arm at rest ============ -->
+    <section class="lhero" data-lhero>
+      <div class="lhero__copy">
+        <p class="eyebrow" data-lh>Every night · 8 PM till late</p>
+        <h1 class="lhero__title">
+          <span class="split-line"><span data-lhl>Live</span></span>
+          <span class="split-line"><span data-lhl><em>Nights.</em></span></span>
+        </h1>
+        <p class="lhero__lede" data-lh>A band on stage, a DJ under the ring, and a room that knows every word. Scroll to drop the needle.</p>
+      </div>
+      <p class="lhero__now" data-lh data-now><i></i><i></i><i></i><i></i><span>Now playing <b>Side A</b></span></p>
+      <span class="lhero__cue" data-lh><i></i>Drop the needle</span>
+    </section>
+
+    <!-- ============ THE WEEK — pinned, the nights slide across ============ -->
+    <section class="lweek" data-lweek>
+      <div class="lweek__sticky">
+        <header class="lweek__head">
+          <p class="eyebrow">The week at Hyde</p>
+          <h2 class="lweek__title">Seven nights, <em>seven moods.</em></h2>
+        </header>
+        <p class="lweek__count" aria-hidden="true"><span data-week-num>01</span> / 07</p>
+        <div class="lweek__rail">
+          <div class="lweek__track" data-ltrack>
+            <article class="lnight" data-night data-hue="#c4532e">
+              <p class="lnight__day"><span>Monday</span><span>8 PM – late</span></p>
+              <h3 class="lnight__name">Hyde <em>Bazaar</em></h3>
+              <p class="lnight__what">Ladies night, with an Arabic live band on stage from the first song.</p>
+              <p class="lnight__tag">Ladies night · Live band</p>
+            </article>
+            <article class="lnight" data-night data-hue="#1f8a6a">
+              <p class="lnight__day"><span>Tuesday</span><span>9 PM – late</span></p>
+              <h3 class="lnight__name">Velvet <em>Room</em></h3>
+              <p class="lnight__what">Deep house and soul from the residents. Low lights, long pours.</p>
+              <p class="lnight__tag">Resident DJs</p>
+            </article>
+            <article class="lnight" data-night data-hue="#3d5fd4">
+              <p class="lnight__day"><span>Wednesday</span><span>9 PM – late</span></p>
+              <h3 class="lnight__name">Blue <em>Notes</em></h3>
+              <p class="lnight__what">Live saxophone over the DJ&rsquo;s set, for the middle of the week.</p>
+              <p class="lnight__tag">Sax &amp; DJ</p>
+            </article>
+            <article class="lnight" data-night data-hue="#b3263a">
+              <p class="lnight__day"><span>Thursday</span><span>10 PM – late</span></p>
+              <h3 class="lnight__name">Stars <em>on Stage</em></h3>
+              <p class="lnight__what">Headline Arabic singers, and a room that sings every chorus back.</p>
+              <p class="lnight__tag">Headliners</p>
+            </article>
+            <article class="lnight" data-night data-hue="#d9a84e">
+              <p class="lnight__day"><span>Friday</span><span>1 PM – late</span></p>
+              <h3 class="lnight__name">Brunch <em>into Night</em></h3>
+              <p class="lnight__what">Brunch rolls on with a live band, then the DJ takes it past midnight.</p>
+              <p class="lnight__tag"><a href="brunch.html" class="link-u">Friday brunch</a></p>
+            </article>
+            <article class="lnight" data-night data-hue="#8a4fd8">
+              <p class="lnight__day"><span>Saturday</span><span>9 PM – 2:30 AM</span></p>
+              <h3 class="lnight__name">Under <em>the Ring</em></h3>
+              <p class="lnight__what">Guest DJs beneath the ring of light, until the last call.</p>
+              <p class="lnight__tag">Guest DJs</p>
+            </article>
+            <article class="lnight" data-night data-hue="#e2a77c">
+              <p class="lnight__day"><span>Sunday</span><span>8 PM – late</span></p>
+              <h3 class="lnight__name">Sunday <em>Slow</em></h3>
+              <p class="lnight__what">Acoustic sets, quieter tables, and the last pour of the week.</p>
+              <p class="lnight__tag">Acoustic</p>
+            </article>
+          </div>
+        </div>
+        <div class="lweek__progress" aria-hidden="true"><i data-week-bar></i></div>
+      </div>
+    </section>
+
+    <!-- ============ ON STAGE — the needle in the groove ============ -->
+    <section class="lstage" data-lstage>
+      <header class="lstage__head">
+        <p class="eyebrow">On stage</p>
+        <h2 class="lstage__title">Voices the room <em>sings back.</em></h2>
+        <p class="lstage__text">Recent nights have brought some of the region&rsquo;s best-loved voices to the Hyde stage.</p>
+      </header>
+      <ol class="lartists">
+        <li class="lartist" data-artist data-hue="#c4532e"><span class="lartist__num">01</span><span class="lartist__photo"><img src="media/artist-eslam.webp" alt="Abdulrhman Alazzawi" width="960" height="1200" loading="lazy" decoding="async" /></span><span class="lartist__name">Abdulrhman Alazzawi</span><span class="lartist__tag">Live at Hyde</span></li>
+        <li class="lartist" data-artist data-hue="#d9a84e"><span class="lartist__num">02</span><span class="lartist__photo"><img src="media/artist-hatim.webp" alt="Yousif Al Sumaidi" width="960" height="1200" loading="lazy" decoding="async" /></span><span class="lartist__name">Yousif Al Sumaidi</span><span class="lartist__tag">Live at Hyde</span></li>
+        <li class="lartist" data-artist data-hue="#b3263a"><span class="lartist__num">03</span><span class="lartist__photo"><img src="media/artist-yousif.webp" alt="Hatim Ammor" width="960" height="1200" loading="lazy" decoding="async" /></span><span class="lartist__name">Hatim Ammor</span><span class="lartist__tag">Live at Hyde</span></li>
+        <li class="lartist" data-artist data-hue="#1f8a6a"><span class="lartist__num">04</span><span class="lartist__photo"><img src="media/artist-abdulrhman.webp" alt="Eslam Elmallah" width="960" height="1200" loading="lazy" decoding="async" /></span><span class="lartist__name">Eslam Elmallah</span><span class="lartist__tag">Live at Hyde</span></li>
+      </ol>
+    </section>
+
+    <!-- ============ FROM THE FLOOR — footage over the spinning record ============ -->
+    <section class="lfilm" data-lfilm>
+      <header class="lfilm__head">
+        <p class="eyebrow">From the floor</p>
+        <h2 class="lfilm__title">Seen <em>on the night.</em></h2>
+      </header>
+      <div class="lfilm__grid">
+        <figure class="lclip lclip--a" data-clip data-speed="-8">
+          <div class="lclip__media"><video muted loop playsinline preload="none" poster="media/play-ring.jpg" data-src="media/play-ring.mp4"></video></div>
+          <figcaption><span>Under the ring</span><small>Resident DJs</small></figcaption>
+        </figure>
+        <figure class="lclip lclip--b lclip--tall" data-clip data-speed="10">
+          <div class="lclip__media"><video muted loop playsinline preload="none" poster="media/play-bazaar.jpg" data-src="media/play-bazaar.mp4"></video></div>
+          <figcaption><span>Hyde Bazaar</span><small>Mondays</small></figcaption>
+        </figure>
+        <figure class="lclip lclip--c" data-clip data-speed="-4">
+          <div class="lclip__media"><video muted loop playsinline preload="none" poster="media/play-crowd.jpg" data-src="media/play-crowd.mp4"></video></div>
+          <figcaption><span>Till 2:30 AM</span><small>Every night</small></figcaption>
+        </figure>
+        <figure class="lclip lclip--d" data-clip data-speed="6">
+          <div class="lclip__media"><video muted loop playsinline preload="none" poster="media/play-room.jpg" data-src="media/play-room.mp4"></video></div>
+          <figcaption><span>The room</span><small>Adliya</small></figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ============ TONIGHT ============ -->
+    <section class="lcta" data-lcta>
+      <p class="eyebrow" data-lc>Tonight</p>
+      <h2 class="lcta__title" data-lc>The needle drops <em>at eight.</em></h2>
+      <p class="lcta__text" data-lc>Tables near the stage go first. Book ahead, or message us for tonight&rsquo;s line-up.</p>
+      <div class="lcta__btns" data-lc>
+        <a class="btn" href="reserve.html"><span class="dot"></span>Book a table</a>
+        <a class="btn btn--ghost" href="https://wa.me/97366655099" target="_blank" rel="noopener">WhatsApp us</a>
+      </div>
+      <p class="lnote" data-lc>Programme shown for preview. Nights and line-ups change; follow @hydebahrain for what&rsquo;s on.</p>
+    </section>
+  </main>
+  <script type="module" src="/src/js/live/live.js"></script>
+</body>
+</html>

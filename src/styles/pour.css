@@ -1,0 +1,148 @@
+/* ==========================================================================
+   HOME — Chapter 01: Pour (the bar)
+   The section overlaps the hero's last screen (margin-top: -100svh) and stays
+   hidden until it pins, so it takes over from the hero without a visible cut.
+   ========================================================================== */
+.pour {
+  position: relative;
+  z-index: 2;
+  height: 460vh;
+  margin-top: -100vh;
+  margin-top: -100svh;
+}
+.pour__sticky {
+  position: sticky; top: 0;
+  height: 100vh; height: 100svh;
+  overflow: hidden;
+  background: var(--chapter);
+  color: var(--on-chapter);
+  visibility: hidden;
+}
+.pour.is-live .pour__sticky { visibility: visible; }
+
+.pour__canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.pour__veil {
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--chapter) 78%, transparent) 0%, transparent 46%),
+    linear-gradient(to top, color-mix(in srgb, var(--chapter) 60%, transparent) 0%, transparent 24%);
+  opacity: 0;
+}
+
+/* ---------- copy ---------- */
+.pour__copy {
+  position: absolute;
+  left: var(--gutter);
+  top: 50%;
+  transform: translateY(-46%);
+  width: min(30rem, 38vw);
+  display: grid;
+  gap: 1.4rem;
+  justify-items: start;
+}
+.pour__copy .eyebrow { color: var(--accent); }
+.pour__title {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: var(--fs-display);
+  line-height: 0.96;
+  letter-spacing: -0.015em;
+}
+.pour__title [data-pl] { display: inline-block; }
+.pour__title em { font-style: italic; color: var(--accent); padding-right: 0.08em; }
+.pour__text { color: color-mix(in srgb, var(--on-chapter) 72%, transparent); max-width: 34ch; }
+.pour__notes {
+  list-style: none;
+  width: 100%;
+  border-top: 1px solid color-mix(in srgb, var(--on-chapter) 16%, transparent);
+}
+.pour__notes li {
+  display: flex; align-items: baseline; gap: 1rem;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--on-chapter) 16%, transparent);
+  font-size: var(--fs-small);
+  color: color-mix(in srgb, var(--on-chapter) 66%, transparent);
+}
+.pour__notes li span {
+  min-width: 6.5rem;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 1.35rem;
+  color: var(--on-chapter);
+}
+
+/* ---------- floating media cards ---------- */
+.pour__cards { position: absolute; inset: 0; pointer-events: none; perspective: 1200px; }
+.pour-card {
+  position: absolute;
+  width: clamp(130px, 12.5vw, 210px);
+  display: grid;
+  gap: 0.85rem;
+  will-change: transform, opacity;
+}
+.pour-card__media {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--bg-2);
+  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.6), 0 0 0 1px color-mix(in srgb, var(--metal) 30%, transparent);
+}
+.pour-card__media video, .pour-card__media img { width: 100%; height: 100%; object-fit: cover; }
+.pour-card__media::after { /* thin brass inner frame */
+  content: ''; position: absolute; inset: 6px; border-radius: 9px;
+  border: 1px solid color-mix(in srgb, var(--metal) 40%, transparent);
+  pointer-events: none;
+}
+.pour-card figcaption { display: grid; gap: 0.4rem; padding: 0 0.2rem; }
+.pour-card figcaption span { font-family: var(--serif); font-style: italic; font-size: 1.12rem; line-height: 1.2; }
+.pour-card figcaption small { font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); white-space: nowrap; }
+
+.pour-card--a { right: 3.5%; top: 7%; }
+.pour-card--b { right: 4.5%; top: 47%; }
+.pour-card--c { left: 38.5%; bottom: 6%; }
+
+/* ---------- wipe ---------- */
+.pour__wipe { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2; }
+.pour__wipe-liquid { fill: var(--brand); } /* the logo terracotta leads the wave */
+.pour__wipe-night { fill: var(--bg); }
+.chapter-card--next .eyebrow, .chapter-card--next .chapter-card__word { color: var(--text); }
+
+
+/* ---------- tablet ---------- */
+@media (max-width: 1100px) and (min-aspect-ratio: 1/1) {
+  .pour__copy { width: min(26rem, 40vw); }
+  .pour__notes { display: none; }
+}
+
+/* ---------- portrait (phones, portrait tablets) ---------- */
+@media (max-aspect-ratio: 1/1) {
+  .pour__title { line-height: 1.04; }
+  .pour { height: 400vh; }
+  .pour__veil {
+    background: linear-gradient(to top, var(--chapter) 0%, color-mix(in srgb, var(--chapter) 85%, transparent) 30%, transparent 58%);
+  }
+  .pour__copy {
+    top: auto; transform: none;
+    bottom: calc(1.6rem + env(safe-area-inset-bottom));
+    right: var(--gutter);
+    width: auto;
+    gap: 1rem;
+  }
+  .pour__notes { display: none; }
+  .pour__text { font-size: 0.92rem; }
+  .pour-card { width: clamp(80px, 20vw, 150px); gap: 0.6rem; }
+  .pour-card figcaption small { display: none; }
+  .pour-card figcaption span { font-size: 0.95rem; }
+  .pour-card--a { left: var(--gutter); top: calc(var(--nav-h) + 1vh); }
+  .pour-card--b { right: var(--gutter); top: calc(var(--nav-h) + 1vh); }
+  .pour-card--c { display: none; }
+}
+@media (max-aspect-ratio: 1/1) and (max-height: 700px) {
+  .pour__text { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pour { height: auto; margin-top: 0; }
+  .pour__sticky { visibility: visible; position: relative; }
+}

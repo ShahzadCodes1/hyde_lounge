@@ -1,0 +1,15 @@
+/* ==========================================================================
+   SITE — the shared stylesheet, linked in every page's <head>.
+   Linked (not imported from JS) so it is render-blocking: the browser never
+   paints a single frame of unstyled HTML, in dev or in production.
+   ========================================================================== */
+@import '@fontsource/cormorant-garamond/latin-300.css';
+@import '@fontsource/cormorant-garamond/latin-400.css';
+@import '@fontsource/cormorant-garamond/latin-300-italic.css';
+@import '@fontsource/cormorant-garamond/latin-400-italic.css';
+@import '@fontsource/manrope/latin-400.css';
+@import '@fontsource/manrope/latin-500.css';
+@import '@fontsource/manrope/latin-600.css';
+@import './palettes.css';
+@import './base.css';
+@import './posters.css';
