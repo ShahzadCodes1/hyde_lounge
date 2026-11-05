@@ -1,8 +1,15 @@
 /* ==========================================================================
    HERO POSTERS — a still of each page's first 3D frame (rendered from the live scene),
    painted with the page so the hero visual is there the moment the curtain lifts.
-   The live canvas fades in over it once its first frame is ready, then the poster is hidden.
+   The live canvas crosses over it once its first frame is ready, then the poster is hidden.
    Regenerate after changing a hero scene: see README ("Hero posters").
+
+   Each live scene frames itself by the screen's shape: on phones and tablets it keeps the
+   scene's width and anchors it at a fixed height; in landscape the Home ring and Menu table
+   keep the height, the other pages keep the width. The posters are placed the same way
+   (background-size / -position below, measured from the live scenes), so on any screen size
+   the still lines up with the live picture. warm() in core/scenes.js checks the first live
+   frame against the poster and glides the poster into place if they still differ.
    ========================================================================== */
 .stage-poster { background: var(--bg) center / cover no-repeat; pointer-events: none; opacity: 0; transform: scale(1.04); }
 /* The hero's single entrance: the still fades up and settles as the curtain lifts (posterIn() in scenes.js).
@@ -13,38 +20,46 @@
 }
 @media (prefers-reduced-motion: reduce), (scripting: none) { .stage-poster { opacity: 1; transform: none; } }
 
-/* One still per screen shape, so the hand-over to the live scene lines up:
-   16:9 (default) · wide windows (≥ 1.95:1) · 16:10 and squarer · tablet portrait · phone portrait. */
-.stage-poster[data-poster='home'] { background-image: url('../assets/posters/home-land.webp'); }
-.stage-poster[data-poster='menu'] { background-image: url('../assets/posters/menu-land.webp'); }
-.stage-poster[data-poster='live'] { background-image: url('../assets/posters/live-land.webp'); }
-.stage-poster[data-poster='brunch'] { background-image: url('../assets/posters/brunch-land.webp'); }
-.stage-poster[data-poster='reserve'] { background-image: url('../assets/posters/reserve-land.webp'); }
-@media (min-aspect-ratio: 39/20) {
-  .stage-poster[data-poster='home'] { background-image: url('../assets/posters/home-wide.webp'); }
-  .stage-poster[data-poster='menu'] { background-image: url('../assets/posters/menu-wide.webp'); }
-  .stage-poster[data-poster='live'] { background-image: url('../assets/posters/live-wide.webp'); }
-  .stage-poster[data-poster='brunch'] { background-image: url('../assets/posters/brunch-wide.webp'); }
-  .stage-poster[data-poster='reserve'] { background-image: url('../assets/posters/reserve-wide.webp'); }
+
+/* landscape (wider than square) */
+.stage-poster[data-poster='home'] { background-image: url('../assets/posters/home-tall.webp'); background-size: auto 100%; background-position: 50% 50%; }
+.stage-poster[data-poster='menu'] { background-image: url('../assets/posters/menu-tall.webp'); background-size: auto 100%; background-position: 70% 50%; }
+.stage-poster[data-poster='live'] { background-image: url('../assets/posters/live-tall.webp'); }
+.stage-poster[data-poster='brunch'] { background-image: url('../assets/posters/brunch-tall.webp'); }
+.stage-poster[data-poster='reserve'] { background-image: url('../assets/posters/reserve-tall.webp'); }
+@media (min-aspect-ratio: 8/5) {
+  .stage-poster[data-poster='home'] { background-image: url('../assets/posters/home-land.webp'); background-size: auto 100%; background-position: 50% 50%; }
+  .stage-poster[data-poster='menu'] { background-image: url('../assets/posters/menu-land.webp'); background-size: auto 100%; background-position: 70% 50%; }
+  .stage-poster[data-poster='live'] { background-image: url('../assets/posters/live-tall.webp'); background-size: 100% auto; background-position: 50% 47%; }
+  .stage-poster[data-poster='brunch'] { background-image: url('../assets/posters/brunch-tall.webp'); background-size: 100% auto; background-position: 50% 47%; }
+  .stage-poster[data-poster='reserve'] { background-image: url('../assets/posters/reserve-tall.webp'); background-size: 100% auto; background-position: 50% 50%; }
 }
-@media (min-aspect-ratio: 1/1) and (max-aspect-ratio: 17/10) {
-  .stage-poster[data-poster='home'] { background-image: url('../assets/posters/home-tall.webp'); }
-  .stage-poster[data-poster='menu'] { background-image: url('../assets/posters/menu-tall.webp'); }
-  .stage-poster[data-poster='live'] { background-image: url('../assets/posters/live-tall.webp'); }
-  .stage-poster[data-poster='brunch'] { background-image: url('../assets/posters/brunch-tall.webp'); }
-  .stage-poster[data-poster='reserve'] { background-image: url('../assets/posters/reserve-tall.webp'); }
+@media (min-aspect-ratio: 16/9) {
+  .stage-poster[data-poster='home'] { background-image: url('../assets/posters/home-wide.webp'); background-size: auto 100%; background-position: 50% 50%; }
+  .stage-poster[data-poster='menu'] { background-image: url('../assets/posters/menu-wide.webp'); background-size: auto 100%; background-position: 70% 50%; }
+  .stage-poster[data-poster='live'] { background-image: url('../assets/posters/live-land.webp'); background-size: 100% auto; background-position: 50% 47%; }
+  .stage-poster[data-poster='brunch'] { background-image: url('../assets/posters/brunch-land.webp'); background-size: 100% auto; background-position: 50% 47%; }
+  .stage-poster[data-poster='reserve'] { background-image: url('../assets/posters/reserve-land.webp'); background-size: 100% auto; background-position: 50% 50%; }
 }
+@media (min-aspect-ratio: 21/10) {
+  .stage-poster[data-poster='live'] { background-image: url('../assets/posters/live-wide.webp'); background-size: 100% auto; background-position: 50% 47%; }
+  .stage-poster[data-poster='brunch'] { background-image: url('../assets/posters/brunch-wide.webp'); background-size: 100% auto; background-position: 50% 47%; }
+  .stage-poster[data-poster='reserve'] { background-image: url('../assets/posters/reserve-wide.webp'); background-size: 100% auto; background-position: 50% 50%; }
+}
+
+/* tablets in portrait */
 @media (max-aspect-ratio: 1/1) {
-  .stage-poster[data-poster='home'] { background-image: url('../assets/posters/home-port.webp'); }
-  .stage-poster[data-poster='menu'] { background-image: url('../assets/posters/menu-port.webp'); }
-  .stage-poster[data-poster='live'] { background-image: url('../assets/posters/live-port.webp'); }
-  .stage-poster[data-poster='brunch'] { background-image: url('../assets/posters/brunch-port.webp'); }
-  .stage-poster[data-poster='reserve'] { background-image: url('../assets/posters/reserve-port.webp'); }
-}
-@media (max-aspect-ratio: 1/1) and (min-aspect-ratio: 3/5) {
-  .stage-poster[data-poster='home'] { background-image: url('../assets/posters/home-tab.webp'); }
-  .stage-poster[data-poster='menu'] { background-image: url('../assets/posters/menu-tab.webp'); }
-  .stage-poster[data-poster='live'] { background-image: url('../assets/posters/live-tab.webp'); }
-  .stage-poster[data-poster='brunch'] { background-image: url('../assets/posters/brunch-tab.webp'); }
+  .stage-poster[data-poster='home'] { background-image: url('../assets/posters/home-tab.webp'); background-size: 100% auto; background-position: 50% 37%; }
+  .stage-poster[data-poster='menu'] { background-image: url('../assets/posters/menu-tab.webp'); background-size: 100% auto; background-position: 50% 28%; }
+  .stage-poster[data-poster='live'] { background-image: url('../assets/posters/live-tab.webp'); background-size: 100% auto; background-position: 50% 30%; }
+  .stage-poster[data-poster='brunch'] { background-image: url('../assets/posters/brunch-tab.webp'); background-size: 100% auto; background-position: 50% 24%; }
   .stage-poster[data-poster='reserve'] { background-image: url('../assets/posters/reserve-tab.webp'); }
+}
+/* phones */
+@media (max-aspect-ratio: 3/5) {
+  .stage-poster[data-poster='home'] { background-image: url('../assets/posters/home-port.webp'); background-size: 100% auto; background-position: 50% 30%; }
+  .stage-poster[data-poster='menu'] { background-image: url('../assets/posters/menu-port.webp'); background-size: 100% auto; background-position: 50% 28%; }
+  .stage-poster[data-poster='live'] { background-image: url('../assets/posters/live-port.webp'); background-size: 100% auto; background-position: 50% 30%; }
+  .stage-poster[data-poster='brunch'] { background-image: url('../assets/posters/brunch-port.webp'); background-size: 100% auto; background-position: 50% 24%; }
+  .stage-poster[data-poster='reserve'] { background-image: url('../assets/posters/reserve-port.webp'); }
 }

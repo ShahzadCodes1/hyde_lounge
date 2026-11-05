@@ -3,27 +3,33 @@
 import { initPaletteSwitcher } from './palette.js';
 import { injectShell } from './shell.js';
 import { initSmoothScroll, ScrollTrigger, reducedMotion } from './smooth.js';
-import { isLeaving, posterReady, posterIn } from './scenes.js';
+import { isLeaving, posterReady, posterIn, posterSettled } from './scenes.js';
 import { initNav } from './nav.js';
 import { initCursor } from './cursor.js';
-import { runLoader, initPageTransitions, curtainUp } from './loader.js';
+import { runLoader, initPageTransitions } from './loader.js';
 import { initFooter } from './footer.js';
 import { prefetchAll } from './prefetch.js';
 
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+let entranceResolve;
+/** Resolves once the hero's entrance (poster, headline, buttons) has finished playing. */
+export const entranceDone = new Promise((r) => { entranceResolve = r; });
+const ENTRANCE_MS = 2000; // the hero copy timelines on every page end by then
+
 /**
- * Run the page's 3D setup once the curtain is up and the hero copy has (mostly) risen.
+ * Run the page's 3D setup once the hero's entrance has finished.
  * Until then the hero shows its poster, a still of the same scene, so nothing looks missing.
  * Building a scene (WebGL context, shader compiles, first frame) is the heaviest work on the
- * page, and on some machines the browser cannot draw anything else while it happens. Doing it
- * behind the closed curtain is what used to keep guests waiting there for seconds; doing it
- * during the copy's entrance would freeze the copy mid-air. So it waits for a settled page,
- * and the scene then fades in on its own.
+ * page, and on phones the browser cannot draw anything else while it happens: started during
+ * the entrance, it freezes the copy and the poster mid-way and then jumps. Started after it,
+ * the screen it holds is a still picture, so the build is invisible. The live scene then
+ * crosses over the identical poster.
  * @param {() => void} fn
- * @param {{ delay?: number }} opts ms to wait after the curtain is up
+ * @param {{ delay?: number }} opts extra ms to wait after the entrance
  */
-export function afterCurtain(fn, { delay = 500 } = {}) {
-  return curtainUp
-    .then(() => new Promise((r) => setTimeout(r, reducedMotion ? 0 : delay)))
+export function afterCurtain(fn, { delay = 120 } = {}) {
+  return entranceDone
+    .then(() => wait(reducedMotion ? 0 : delay))
     .then(() => new Promise((r) => requestAnimationFrame(() => setTimeout(r, 0))))
     .then(() => { if (!isLeaving()) { fn(); ScrollTrigger.refresh(); } });
 }
@@ -48,7 +54,9 @@ export async function boot(page, { preload = [], onReveal } = {}) {
   await runLoader([fonts, posterReady(), ...preload]);
   posterIn();
   onReveal?.();
-  // layout work waits until the curtain is fully up, so it can never hitch the entrance
-  curtainUp.then(() => { initFooter(); ScrollTrigger.refresh(); });
-  prefetchAll(page);
+  // layout work and the footer wait for the entrance too, so nothing can hitch it
+  entranceDone.then(() => { initFooter(); ScrollTrigger.refresh(); });
+  // nothing heavy (3D builds, prefetching other pages) runs until the entrance is over
+  Promise.all([posterSettled(), wait(reducedMotion ? 0 : ENTRANCE_MS)]).then(entranceResolve);
+  entranceDone.then(() => prefetchAll(page));
 }

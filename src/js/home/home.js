@@ -42,7 +42,7 @@ afterCurtain(() => {
       .then(() => later(() => initPlay({ lite, reduced: reducedMotion }).ready))
       .then(() => { if (!isLeaving()) ScrollTrigger.refresh(); });
   });
-}, { delay: 700 });
+});
 
 /* ---------- intro: the sign lights up, copy rises ---------- */
 function playIntro() {
