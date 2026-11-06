@@ -95,7 +95,7 @@ function footer(current) {
         ${PAGES.map((p) => `<a class="link-u" href="${p.href}"${p.id === current ? ' aria-current="page"' : ''}>${p.label}</a>`).join('')}
       </nav>
     </div>
-    <div class="foot__mark" aria-hidden="true"><img src="${logoUrl}" alt="" /></div>
+    <div class="foot__mark" aria-hidden="true"><img src="${logoUrl}" alt="" width="344" height="100" loading="lazy" decoding="async" /></div>
     <div class="foot__base"><span>© ${year} Hyde Lounge</span><span>Adliya · Bahrain</span></div>
   </footer>`;
 }

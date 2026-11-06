@@ -93,7 +93,7 @@ function glowTexture(half) {
   const h = Math.round((100 + M * 2) * k);
   const c = document.createElement('canvas');
   c.width = w; c.height = h;
-  const ctx = c.getContext('2d');
+  const ctx = c.getContext('2d', { willReadFrequently: true });
   ctx.save();
   ctx.scale(k, k);
   ctx.translate(M, M);
@@ -121,7 +121,7 @@ function glowTexture(half) {
 function loungeTexture() {
   const c = document.createElement('canvas');
   c.width = 1024; c.height = 128;
-  const ctx = c.getContext('2d');
+  const ctx = c.getContext('2d', { willReadFrequently: true });
   ctx.fillStyle = '#fff';
   ctx.font = '600 64px Manrope, sans-serif';
   ctx.textAlign = 'center';

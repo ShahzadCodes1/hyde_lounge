@@ -45,13 +45,22 @@
   </script>
   <link rel="stylesheet" href="/src/styles/site.css" />
   <link rel="stylesheet" href="/src/styles/reserve.css" />
+  <!-- the hero poster for this screen shape (the first big picture) and the fonts of the first screen -->
+  <link rel="preload" as="image" href="/src/assets/posters/reserve-port.webp" media="(max-aspect-ratio: 3/5)" fetchpriority="high" />
+  <link rel="preload" as="image" href="/src/assets/posters/reserve-tab.webp" media="(min-aspect-ratio: 6001/10000) and (max-aspect-ratio: 1/1)" fetchpriority="high" />
+  <link rel="preload" as="image" href="/src/assets/posters/reserve-tall.webp" media="(min-aspect-ratio: 10001/10000) and (max-aspect-ratio: 17777/10000)" fetchpriority="high" />
+  <link rel="preload" as="image" href="/src/assets/posters/reserve-land.webp" media="(min-aspect-ratio: 16/9) and (max-aspect-ratio: 20999/10000)" fetchpriority="high" />
+  <link rel="preload" as="image" href="/src/assets/posters/reserve-wide.webp" media="(min-aspect-ratio: 21/10)" fetchpriority="high" />
+  <link rel="preload" as="font" type="font/woff2" href="/node_modules/@fontsource/cormorant-garamond/files/cormorant-garamond-latin-300-normal.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="/node_modules/@fontsource/cormorant-garamond/files/cormorant-garamond-latin-300-italic.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="/node_modules/@fontsource/manrope/files/manrope-latin-400-normal.woff2" crossorigin />
 </head>
 <body data-page="reserve" class="is-loading">
   <!-- The curtain is part of the page itself, so it is the very first thing painted. -->
   <div class="loader" data-loader>
     <div class="loader__panel"></div>
     <div class="loader__inner">
-      <img class="loader__logo" src="/src/assets/hyde-logo.svg" alt="" />
+      <img class="loader__logo" src="/src/assets/hyde-logo.svg" alt="" width="344" height="100" fetchpriority="high" />
       <div class="loader__bar"><i></i></div>
       <div class="loader__meta"><span>Bahrain</span><span class="loader__count" data-count>000</span></div>
     </div>

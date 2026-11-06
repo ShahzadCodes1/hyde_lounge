@@ -49,13 +49,22 @@
   <link rel="stylesheet" href="/src/styles/pour.css" />
   <link rel="stylesheet" href="/src/styles/plate.css" />
   <link rel="stylesheet" href="/src/styles/play.css" />
+  <!-- the hero poster for this screen shape (the first big picture) and the fonts of the first screen -->
+  <link rel="preload" as="image" href="/src/assets/posters/home-port.webp" media="(max-aspect-ratio: 3/5)" fetchpriority="high" />
+  <link rel="preload" as="image" href="/src/assets/posters/home-tab.webp" media="(min-aspect-ratio: 6001/10000) and (max-aspect-ratio: 1/1)" fetchpriority="high" />
+  <link rel="preload" as="image" href="/src/assets/posters/home-tall.webp" media="(min-aspect-ratio: 10001/10000) and (max-aspect-ratio: 15999/10000)" fetchpriority="high" />
+  <link rel="preload" as="image" href="/src/assets/posters/home-land.webp" media="(min-aspect-ratio: 8/5) and (max-aspect-ratio: 17777/10000)" fetchpriority="high" />
+  <link rel="preload" as="image" href="/src/assets/posters/home-wide.webp" media="(min-aspect-ratio: 16/9)" fetchpriority="high" />
+  <link rel="preload" as="font" type="font/woff2" href="/node_modules/@fontsource/cormorant-garamond/files/cormorant-garamond-latin-300-normal.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="/node_modules/@fontsource/cormorant-garamond/files/cormorant-garamond-latin-300-italic.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="/node_modules/@fontsource/manrope/files/manrope-latin-400-normal.woff2" crossorigin />
 </head>
 <body data-page="home" class="is-loading">
   <!-- The curtain is part of the page itself, so it is the very first thing painted. -->
   <div class="loader" data-loader>
     <div class="loader__panel"></div>
     <div class="loader__inner">
-      <img class="loader__logo" src="/src/assets/hyde-logo.svg" alt="" />
+      <img class="loader__logo" src="/src/assets/hyde-logo.svg" alt="" width="344" height="100" fetchpriority="high" />
       <div class="loader__bar"><i></i></div>
       <div class="loader__meta"><span>Bahrain</span><span class="loader__count" data-count>000</span></div>
     </div>
@@ -131,15 +140,15 @@
 
         <div class="pour__cards">
           <figure class="pour-card pour-card--a" data-card>
-            <div class="pour-card__media"><video muted loop playsinline preload="none" poster="/media/pour-bar.jpg" data-src="/media/pour-bar.mp4"></video></div>
+            <div class="pour-card__media"><video muted loop playsinline preload="none" data-poster-src="pour-bar.jpg" data-src="pour-bar.mp4"></video></div>
             <figcaption><span>Signature sours</span><small>Foam · cherries</small></figcaption>
           </figure>
           <figure class="pour-card pour-card--b" data-card>
-            <div class="pour-card__media"><img src="/media/pour-bartender.jpg" alt="A bartender pouring a stirred cocktail at the Hyde bar" loading="lazy" width="480" height="478" /></div>
+            <div class="pour-card__media"><img src="/src/media/pour-bartender.jpg" alt="A bartender pouring a stirred cocktail at the Hyde bar" loading="lazy" width="480" height="478" /></div>
             <figcaption><span>Stirred to order</span><small>At the bar</small></figcaption>
           </figure>
           <figure class="pour-card pour-card--c" data-card>
-            <div class="pour-card__media"><video muted loop playsinline preload="none" poster="/media/pour-toast.jpg" data-src="/media/pour-toast.mp4"></video></div>
+            <div class="pour-card__media"><video muted loop playsinline preload="none" data-poster-src="pour-toast.jpg" data-src="pour-toast.mp4"></video></div>
             <figcaption><span>Raise a glass</span><small>Nightly from 8 PM</small></figcaption>
           </figure>
         </div>
@@ -187,11 +196,11 @@
 
         <div class="plate__cards">
           <figure class="pour-card plate-feature plate-card--a" data-qcard>
-            <div class="pour-card__media"><img src="/media/plate-pans.webp" alt="Copper pans of sides on the Hyde table" loading="lazy" width="960" height="1200" /></div>
+            <div class="pour-card__media"><img src="/src/media/plate-pans.webp" alt="Copper pans of sides on the Hyde table" loading="lazy" width="960" height="1200" /></div>
             <figcaption><span>Copper-pan sides</span><small>Served bubbling</small></figcaption>
           </figure>
           <figure class="pour-card plate-feature plate-card--b" data-qcard>
-            <div class="pour-card__media"><img src="/media/plate-tartare.webp" alt="A tartare plated at Hyde" loading="lazy" width="960" height="1200" /></div>
+            <div class="pour-card__media"><img src="/src/media/plate-tartare.webp" alt="A tartare plated at Hyde" loading="lazy" width="960" height="1200" /></div>
             <figcaption><span>From the raw bar</span><small>Plated to order</small></figcaption>
           </figure>
         </div>
@@ -234,19 +243,19 @@
 
         <div class="play__cards">
           <figure class="pour-card play-card play-card--a" data-ycard>
-            <div class="pour-card__media"><video muted loop playsinline preload="none" poster="/media/play-ring.jpg" data-src="/media/play-ring.mp4"></video></div>
+            <div class="pour-card__media"><video muted loop playsinline preload="none" data-poster-src="play-ring.jpg" data-src="play-ring.mp4"></video></div>
             <figcaption><span>Under the ring</span><small>Resident DJs</small></figcaption>
           </figure>
           <figure class="pour-card play-card play-card--b" data-ycard>
-            <div class="pour-card__media"><video muted loop playsinline preload="none" poster="/media/play-crowd.jpg" data-src="/media/play-crowd.mp4"></video></div>
+            <div class="pour-card__media"><video muted loop playsinline preload="none" data-poster-src="play-crowd.jpg" data-src="play-crowd.mp4"></video></div>
             <figcaption><span>Till 2:30 AM</span><small>Every night</small></figcaption>
           </figure>
           <figure class="pour-card play-card play-card--poster play-card--c" data-ycard>
-            <div class="pour-card__media"><video muted loop playsinline preload="none" poster="/media/play-bazaar.jpg" data-src="/media/play-bazaar.mp4"></video></div>
+            <div class="pour-card__media"><video muted loop playsinline preload="none" data-poster-src="play-bazaar.jpg" data-src="play-bazaar.mp4"></video></div>
             <figcaption><span>Hyde Bazaar</span><small>Mondays</small></figcaption>
           </figure>
           <figure class="pour-card play-card play-card--d" data-ycard>
-            <div class="pour-card__media"><video muted loop playsinline preload="none" poster="/media/play-room.jpg" data-src="/media/play-room.mp4"></video></div>
+            <div class="pour-card__media"><video muted loop playsinline preload="none" data-poster-src="play-room.jpg" data-src="play-room.mp4"></video></div>
             <figcaption><span>The room</span><small>Adliya</small></figcaption>
           </figure>
         </div>

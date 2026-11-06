@@ -1,7 +1,8 @@
 /* ==========================================================================
    SITE — the shared stylesheet, linked in every page's <head>.
-   Linked (not imported from JS) so it is render-blocking: the browser never
-   paints a single frame of unstyled HTML, in dev or in production.
+   Linked (not imported from JS) so the browser never paints a single frame of unstyled
+   HTML. In the production build it is inlined into each page (vite.config.js), so it
+   costs no extra request before the first paint.
    ========================================================================== */
 @import '@fontsource/cormorant-garamond/latin-300.css';
 @import '@fontsource/cormorant-garamond/latin-400.css';
@@ -13,3 +14,28 @@
 @import './palettes.css';
 @import './base.css';
 @import './posters.css';
+
+/* Size-matched fallbacks: while a web font is still loading, text is set in a local font
+   scaled to the web font's width and line metrics (measured from the font files), so nothing
+   moves when the real font swaps in. */
+@font-face {
+  font-family: 'Cormorant Fallback'; font-style: normal; font-weight: 100 900;
+  src: local('Times New Roman'), local('TimesNewRomanPSMT'), local('Liberation Serif');
+  size-adjust: 97.07%; ascent-override: 95.19%; descent-override: 29.57%; line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'Cormorant Fallback'; font-style: italic; font-weight: 100 900;
+  src: local('Times New Roman Italic'), local('TimesNewRomanPS-ItalicMT'), local('Liberation Serif Italic');
+  size-adjust: 87.13%; ascent-override: 106.05%; descent-override: 32.94%; line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'Manrope Fallback'; font-style: normal; font-weight: 100 900;
+  src: local('Arial'), local('ArialMT'), local('Liberation Sans'), local('Roboto');
+  size-adjust: 104.28%; ascent-override: 102.23%; descent-override: 28.77%; line-gap-override: 0%;
+}
+/* uppercase labels (buttons, eyebrows) have their own proportions */
+@font-face {
+  font-family: 'Manrope Caps Fallback'; font-style: normal; font-weight: 100 900;
+  src: local('Arial'), local('ArialMT'), local('Liberation Sans'), local('Roboto');
+  size-adjust: 94.5%; ascent-override: 112.8%; descent-override: 31.75%; line-gap-override: 0%;
+}

@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { COLORS, readPalette } from '../home/scene-colors.js';
-import { createBackdrop, createBarTop, softboxEnvironment, canvasTex, wordTexture } from '../home/studio.js';
+import { createBackdrop, createBarTop, softboxEnvironment, canvasTex, wordTexture, blankWord } from '../home/studio.js';
+import { rejectSoftware, governor } from '../core/quality.js';
 import { beamMaterial } from '../home/stage-scene.js';
 
 /* ==========================================================================
@@ -78,7 +79,7 @@ function anisotropyTexture() {
   const S = 256;
   const c = document.createElement('canvas');
   c.width = c.height = S;
-  const ctx = c.getContext('2d');
+  const ctx = c.getContext('2d', { willReadFrequently: true });
   const img = ctx.createImageData(S, S);
   for (let y = 0; y < S; y++) {
     for (let x = 0; x < S; x++) {
@@ -142,6 +143,7 @@ export function createLiveScene(canvas, { lite = false } = {}) {
   } catch {
     return null;
   }
+  if (rejectSoftware(renderer)) return null; // no graphics chip: the poster stays
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, lite ? 1.5 : 1.75));
   renderer.toneMapping = THREE.NoToneMapping;
 
@@ -163,9 +165,9 @@ export function createLiveScene(canvas, { lite = false } = {}) {
   floor.setColors(stage, 1.5);
   floor.u.uFade.value.set(-2.4, -6.6);
   floor.u.uShadow.value = 1;
-  const reflScale = lite ? 0.35 : 0.55;
+  let reflScale = lite ? 0.35 : 0.55;
   // the giant word, thrown onto the stage floor behind the deck like a gobo, in the night's colour
-  let goboWord = wordTexture('Live');
+  let goboWord = blankWord(); // drawn by refreshText() once the font is in
   const goboMat = new THREE.MeshBasicMaterial({ map: goboWord.tex, color: new THREE.Color(), transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false });
   const gobo = new THREE.Mesh(new THREE.PlaneGeometry(14, 14 / goboWord.aspect).rotateX(-Math.PI / 2), goboMat);
   gobo.position.set(-0.4, 0.004, -4.3);
@@ -490,7 +492,20 @@ export function createLiveScene(canvas, { lite = false } = {}) {
     renderer.render(scene, camera);
   }
 
-  function loop() { if (!running) return; render(); raf = requestAnimationFrame(loop); }
+  // If the device cannot keep up: fewer pixels, then a softer reflection, then 30 fps.
+  const gov = governor({
+    steps: [
+      () => { renderer.setPixelRatio(Math.max(1, renderer.getPixelRatio() * 0.8)); width = 0; resize(); },
+      () => { reflScale *= 0.6; width = 0; resize(); },
+      'cap',
+    ],
+  });
+  function loop(now) {
+    if (!running) return;
+    raf = requestAnimationFrame(loop);
+    if (gov.skip(now)) return;
+    render();
+  }
 
   function refreshText() {
     backdrop.refreshWord();
@@ -518,7 +533,7 @@ export function createLiveScene(canvas, { lite = false } = {}) {
     refreshText,
     renderOnce: render,
     compile() { return renderer.compileAsync ? renderer.compileAsync(scene, camera).catch(() => {}) : renderer.compile(scene, camera); },
-    start() { if (running) return; running = true; last = performance.now(); raf = requestAnimationFrame(loop); },
+    start() { if (running) return; running = true; last = performance.now(); gov.reset(); raf = requestAnimationFrame(loop); },
     stop() { running = false; cancelAnimationFrame(raf); },
   };
 }

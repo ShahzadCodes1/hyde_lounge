@@ -8,8 +8,7 @@
    scene's width and anchors it at a fixed height; in landscape the Home ring and Menu table
    keep the height, the other pages keep the width. The posters are placed the same way
    (background-size / -position below, measured from the live scenes), so on any screen size
-   the still lines up with the live picture. warm() in core/scenes.js checks the first live
-   frame against the poster and glides the poster into place if they still differ.
+   the still lines up with the live picture and the live canvas simply crossfades over it.
    ========================================================================== */
 .stage-poster { background: var(--bg) center / cover no-repeat; pointer-events: none; opacity: 0; transform: scale(1.04); }
 /* The hero's single entrance: the still fades up and settles as the curtain lifts (posterIn() in scenes.js).

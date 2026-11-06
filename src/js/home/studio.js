@@ -10,10 +10,17 @@ import { Reflector } from 'three/addons/objects/Reflector.js';
    · a polished black bar top with a real mirror reflection, caustic and shadow
    ========================================================================== */
 
+// Phones and tablets: half-resolution text textures (a quarter of the graphics memory). They are
+// soft, faint backdrops, so the difference is invisible; on iOS, graphics memory is what runs out.
+const LITE = window.matchMedia('(hover: none), (pointer: coarse)').matches || window.innerWidth < 768;
+
+/** A 2D context that lives in main memory: uploading it to WebGL then needs no read-back from the GPU. */
+export const ctx2d = (c) => c.getContext('2d', { willReadFrequently: true });
+
 export function canvasTex(w, h, draw, srgb = true) {
   const c = document.createElement('canvas');
   c.width = w; c.height = h;
-  draw(c.getContext('2d'), w, h);
+  draw(ctx2d(c), w, h);
   const tex = new THREE.CanvasTexture(c);
   if (srgb) tex.colorSpace = THREE.SRGBColorSpace;
   tex.anisotropy = 4;
@@ -21,15 +28,19 @@ export function canvasTex(w, h, draw, srgb = true) {
 }
 
 export function wordTexture(text) {
-  const tex = canvasTex(4096, 1400, (ctx, w, h) => {
-    ctx.font = 'italic 300 1250px "Cormorant Garamond", serif';
+  const k = LITE ? 0.5 : 1;
+  const tex = canvasTex(4096 * k, 1400 * k, (ctx, w, h) => {
+    ctx.font = `italic 300 ${1250 * k}px "Cormorant Garamond", serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillStyle = '#fff';
-    ctx.fillText(text, w / 2, h / 2 + 60);
+    ctx.fillText(text, w / 2, h / 2 + 60 * k);
   });
   return { tex, aspect: 4096 / 1400 };
 }
+
+/** Stand-in until the display font has loaded and refreshWord() draws the real word (drawn once). */
+export const blankWord = () => ({ tex: canvasTex(1, 1, () => {}), aspect: 4096 / 1400 });
 
 
 /* ---------- product-photography environment ---------- */
@@ -106,7 +117,7 @@ export const BarTopShader = {
 
 /** Backdrop wall. Returns { mesh, u } — u are the shader uniforms to animate. */
 export function createBackdrop({ word, wordW = 11, wordY = 1.75, bg, brand, glow, haze }) {
-  const w = wordTexture(word);
+  const w = blankWord(); // every page calls refreshWord() once the font is in
   const mesh = new THREE.Mesh(
     new THREE.PlaneGeometry(60, 30).translate(0, 15, 0),
     new THREE.ShaderMaterial({

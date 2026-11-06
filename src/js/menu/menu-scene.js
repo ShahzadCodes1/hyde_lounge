@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { COLORS, readPalette } from '../home/scene-colors.js';
 import { createBackdrop, createBarTop, softboxEnvironment, canvasTex } from '../home/studio.js';
+import { rejectSoftware, governor } from '../core/quality.js';
+import { mediaUrl } from '../core/media.js';
 import {
   GLASS_FLUTES, FLUTE_COUNT, GLASS_BODY, LIQUID_PROFILE, ICE, BASE_TOP,
   diamondCutNormalMap, glowFromColor, surfaceTexture, crystalMaterial, iceMaterial, radiusAt,
@@ -54,6 +56,7 @@ export function createMenuScene(canvas, { items, lite = false }) {
   } catch {
     return null;
   }
+  if (rejectSoftware(renderer)) return null; // no graphics chip: the poster stays
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, lite ? 1.5 : 1.75));
   renderer.localClippingEnabled = true;
   renderer.transmissionResolutionScale = lite ? 0.5 : 0.8;
@@ -77,7 +80,7 @@ export function createMenuScene(canvas, { items, lite = false }) {
   bar.setColors(room, 0.6);
   bar.u.uFade.value.set(-3.5, -7.5);
   bar.u.uShadow.value = 1;
-  const reflScale = lite ? 0.35 : 0.55;
+  let reflScale = lite ? 0.35 : 0.55;
 
   scene.add(new THREE.AmbientLight(0xffffff, 0.08));
   const pool = new THREE.SpotLight(COLORS.glow, 30, 14, 0.55, 0.7, 1.2);
@@ -91,7 +94,7 @@ export function createMenuScene(canvas, { items, lite = false }) {
   /* --- objects --- */
   const loader = new THREE.TextureLoader();
   // phones get 640 px dish photos (half the download, a quarter of the GPU memory)
-  const url = (f) => import.meta.env.BASE_URL + (lite && /^media\/plate-\d\.webp$/.test(f) ? f.replace(/\.webp$/, '-sm.webp') : f);
+  const url = (f) => mediaUrl(lite && /^media\/plate-\d\.webp$/.test(f) ? f.replace(/\.webp$/, '-sm.webp') : f);
   const seg = lite ? 80 : 128;
   const stone = new THREE.MeshStandardMaterial({ color: new THREE.Color('#141414'), roughness: 0.72, envMapIntensity: 0.4 });
   const plateBody = new THREE.CylinderGeometry(PLATE_R * 0.985, PLATE_R * 0.9, 0.035, 96).translate(0, 0.0175, 0);
@@ -290,7 +293,20 @@ export function createMenuScene(canvas, { items, lite = false }) {
     renderer.render(scene, camera);
   }
 
-  function loop() { if (!running) return; render(); raf = requestAnimationFrame(loop); }
+  // If the device cannot keep up: fewer pixels, then a softer reflection and refraction, then 30 fps.
+  const gov = governor({
+    steps: [
+      () => { renderer.setPixelRatio(Math.max(1, renderer.getPixelRatio() * 0.8)); width = 0; resize(); },
+      () => { reflScale *= 0.6; renderer.transmissionResolutionScale *= 0.6; width = 0; resize(); },
+      'cap',
+    ],
+  });
+  function loop(now) {
+    if (!running) return;
+    raf = requestAnimationFrame(loop);
+    if (gov.skip(now)) return;
+    render();
+  }
 
   function refreshPalette() {
     readPalette();
@@ -310,7 +326,7 @@ export function createMenuScene(canvas, { items, lite = false }) {
     refreshWord: backdrop.refreshWord,
     renderOnce: render,
     compile() { return renderer.compileAsync ? renderer.compileAsync(scene, camera).catch(() => {}) : renderer.compile(scene, camera); },
-    start() { if (running) return; running = true; last = performance.now(); raf = requestAnimationFrame(loop); },
+    start() { if (running) return; running = true; last = performance.now(); gov.reset(); raf = requestAnimationFrame(loop); },
     stop() { running = false; cancelAnimationFrame(raf); },
   };
 }

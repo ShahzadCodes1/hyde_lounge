@@ -1,5 +1,6 @@
-import { boot } from '../core/app.js';
+import { boot, firstPaint } from '../core/app.js';
 import { track, stageHero } from '../core/scenes.js';
+import { softwareGL } from '../core/quality.js';
 import { gsap, ScrollTrigger, reducedMotion, isTouch } from '../core/smooth.js';
 import { createBrunchScene } from './brunch-scene.js';
 import { fadeInUpperZone } from '../core/zone.js';
@@ -31,9 +32,9 @@ boot('brunch', {
 });
 
 // The tower is built while the curtain is down, so it is live the moment the curtain lifts.
-queueMicrotask(() => {
+firstPaint.then(() => { // after the curtain's first paint (see app.js), after boot() has set up the shell
   scene = track(createBrunchScene(canvas, { lite }));
-  if (!scene) document.documentElement.classList.add('no-webgl');
+  if (!scene && !softwareGL()) document.documentElement.classList.add('no-webgl'); // software WebGL keeps the poster
   if (reducedMotion) staticPage();
   else build();
   stageHero(scene, canvas, {

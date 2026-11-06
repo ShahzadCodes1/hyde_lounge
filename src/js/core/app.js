@@ -9,8 +9,20 @@ import { initCursor } from './cursor.js';
 import { runLoader, initPageTransitions } from './loader.js';
 import { initFooter } from './footer.js';
 import { prefetchAll } from './prefetch.js';
+import { initLazyMedia } from './media.js';
 
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * Resolves just after the browser has painted the page once (the curtain is static HTML and CSS).
+ * Every page starts its script work (shell, scroll setup, the hero's 3D) from here, so the very
+ * first paint never waits for it: on a slow phone the curtain shows at once instead of after
+ * a few hundred milliseconds of script.
+ */
+export const firstPaint = new Promise((r) => {
+  requestAnimationFrame(() => setTimeout(r, 0)); // rAF runs right before a paint; the timeout right after it
+  setTimeout(r, 150); // a tab opened in the background does not paint: do not wait for it
+});
 let entranceResolve;
 /** Resolves once the hero's entrance (poster, headline, buttons) has finished playing. */
 export const entranceDone = new Promise((r) => { entranceResolve = r; });
@@ -39,6 +51,7 @@ export function afterCurtain(fn, { delay = 120 } = {}) {
  */
 export async function boot(page, { preload = [], onReveal } = {}) {
   if (window.__hydeLeaving) return; // the first-paint script is already sending this visit back to Home
+  await firstPaint;
   window.scrollTo(0, 0);
   injectShell(page);
   initPaletteSwitcher();
@@ -46,6 +59,7 @@ export async function boot(page, { preload = [], onReveal } = {}) {
   initNav();
   initCursor();
   initPageTransitions();
+  initLazyMedia();
 
   // If the phone's browser takes a 3D canvas's graphics memory back (iOS does this under memory
   // pressure), hide that canvas so the section shows its backdrop and copy rather than a black

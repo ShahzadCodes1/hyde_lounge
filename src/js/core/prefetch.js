@@ -29,12 +29,12 @@ export function prefetchPage(href) {
   fetch(key, { credentials: 'same-origin' })
     .then((r) => (r.ok ? r.text() : ''))
     .then((html) => {
-      // the page's own scripts and styles (paths are relative to that page)
-      const re = /<(script|link)[^>]+(?:src|href)="([^"]+\.(?:js|css))"/g;
+      // the page's own scripts and styles: in tags (dev) or in the built page's script loader
+      const re = /<(?:script|link)[^>]+(?:src|href)="([^"]+\.(?:js|css))"|"(\/assets\/[^"]+\.js)"/g;
       let m;
       while ((m = re.exec(html))) {
-        const asset = new URL(m[2], key).href;
-        hint(asset, m[2].endsWith('.css') ? 'style' : 'script');
+        const path = m[1] || m[2];
+        hint(new URL(path, key).href, path.endsWith('.css') ? 'style' : 'script');
       }
     })
     .catch(() => {});

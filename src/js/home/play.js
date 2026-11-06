@@ -1,4 +1,6 @@
 import { track } from '../core/scenes.js';
+import { entranceDone } from '../core/app.js';
+import { mediaUrl, revealVideo } from '../core/media.js';
 import { gsap, ScrollTrigger } from '../core/smooth.js';
 import { createStageScene } from './stage-scene.js';
 
@@ -13,7 +15,7 @@ import { createStageScene } from './stage-scene.js';
 
 export function initPlay({ lite, reduced }) {
   const section = document.querySelector('[data-play]');
-  if (!section) return { build: () => Promise.resolve() };
+  if (!section) return { build: () => Promise.resolve(), approached: Promise.resolve() };
   const canvas = section.querySelector('[data-play-canvas]');
   let scene = null; // the 3D is built later (build()); the scroll choreography works without it
 
@@ -22,15 +24,17 @@ export function initPlay({ lite, reduced }) {
   const reveals = section.querySelectorAll('[data-yr]');
   const cards = section.querySelectorAll('[data-ycard]');
   const videos = section.querySelectorAll('video[data-src]');
-  const asset = (path) => import.meta.env.BASE_URL + path.replace(/^\//, '');
-  const loadVideos = () => videos.forEach((v) => { if (!v.getAttribute('src')) { v.src = asset(v.dataset.src); v.load(); } });
+  const loadVideos = () => videos.forEach((v) => { if (!v.getAttribute('src')) { v.src = mediaUrl(v.dataset.src); v.load(); v.addEventListener('playing', () => revealVideo(v), { once: true }); } });
   const playVideos = (on) => videos.forEach((v) => (on ? v.play().catch(() => {}) : v.pause()));
 
-  // The 3D scene is built on demand: in the background once the hero entrance is over (home.js
-  // chains the three chapters), or at the latest when the guest scrolls near the chapter.
+  // The 3D scene is built on demand, never during the hero entrance: at an idle moment once the guest
+  // is getting close (home.js schedules it), or at the latest when the guest scrolls up to the chapter.
   // Until its first frame is drawn the canvas stays hidden, so the section shows its own
   // dark backdrop and copy, never a black, unpainted canvas.
   let ready = null;
+  let approach;
+  /** Resolves once the guest is within two screens of the chapter (home.js builds it then, at an idle moment). */
+  const approached = new Promise((r) => { approach = r; });
   let lastP = 0; // the chapter's scroll progress, so a scene built mid-chapter starts in the right place
   if (canvas) canvas.style.visibility = 'hidden';
   const near = () => { const r = section.getBoundingClientRect(); return r.top < innerHeight && r.bottom > 0; };
@@ -57,8 +61,8 @@ export function initPlay({ lite, reduced }) {
     gsap.set(intro, { display: 'none' });
     gsap.set([canvas, '.play__veil'], { opacity: 1 });
     loadVideos();
-    build();
-    return { build };
+    entranceDone.then(build);
+    return { build, approached: Promise.resolve() };
   }
 
   gsap.set(intro, { visibility: 'inherit' }); // inherit: stays hidden with its section until the section pins
@@ -105,7 +109,11 @@ export function initPlay({ lite, reduced }) {
     else if (section.classList.contains('is-live')) scene?.start();
   });
 
-  // the latest moment: the guest is about to scroll into the chapter
-  ScrollTrigger.create({ trigger: section, start: 'top bottom+=100%', end: 'bottom top', onEnter: build, onEnterBack: build });
-  return { build };
+  // Close to the chapter: home.js builds it at the next idle moment (never behind the curtain:
+  // on phones the first chapter is already within two screens when the page opens).
+  ScrollTrigger.create({ trigger: section, start: 'top bottom+=200%', end: 'bottom top', onToggle: (self) => self.isActive && approach() });
+  // The latest moment: the guest is about to scroll into the chapter, build now (after the entrance).
+  const soon = () => entranceDone.then(build);
+  ScrollTrigger.create({ trigger: section, start: 'top bottom+=50%', end: 'bottom top', onEnter: soon, onEnterBack: soon });
+  return { build, approached };
 }

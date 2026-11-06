@@ -7,6 +7,7 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { createRingSign, SIGN } from './ring-sign.js';
 import { COLORS, readPalette } from './scene-colors.js';
+import { rejectSoftware, governor } from '../core/quality.js';
 
 /* ==========================================================================
    HERO SCENE — the Hyde LED-ring sign, rebuilt in WebGL.
@@ -25,18 +26,19 @@ const RING_SPAN = SIGN.outer * 2 + 0.3;
 
 /* ---------- textures drawn on canvas ---------- */
 
-function makeWordTexture(text) {
-  const w = 4096;
-  const h = 900;
+function makeWordTexture(text, lite) {
+  const k = lite ? 0.5 : 1; // phones: a quarter of the memory for a faint, soft backdrop word
+  const w = 4096 * k;
+  const h = 900 * k;
   const c = document.createElement('canvas');
   c.width = w;
   c.height = h;
-  const ctx = c.getContext('2d');
-  ctx.font = 'italic 300 640px "Cormorant Garamond", serif';
+  const ctx = c.getContext('2d', { willReadFrequently: true }); // CPU-backed: no GPU read-back on upload
+  ctx.font = `italic 300 ${640 * k}px "Cormorant Garamond", serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillStyle = '#fff';
-  ctx.fillText(text, w / 2, h / 2 + 30);
+  ctx.fillText(text, w / 2, h / 2 + 30 * k);
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
   return { tex, aspect: w / h };
@@ -46,7 +48,7 @@ function makeGlowTexture() {
   const s = 256;
   const c = document.createElement('canvas');
   c.width = c.height = s;
-  const ctx = c.getContext('2d');
+  const ctx = c.getContext('2d', { willReadFrequently: true });
   const g = ctx.createRadialGradient(s / 2, s / 2, 0, s / 2, s / 2, s / 2);
   g.addColorStop(0, 'rgba(255,255,255,1)');
   g.addColorStop(0.35, 'rgba(255,255,255,0.35)');
@@ -153,7 +155,8 @@ export function createHeroScene(canvas, { lite = false, reduced = false } = {}) 
   } catch (err) {
     return null; // no WebGL — caller shows the CSS fallback
   }
-  const dpr = Math.min(window.devicePixelRatio || 1, lite ? 1.5 : 1.75);
+  if (rejectSoftware(renderer)) return null; // no graphics chip: the poster stays
+  let dpr = Math.min(window.devicePixelRatio || 1, lite ? 1.5 : 1.75);
   renderer.setPixelRatio(dpr);
   renderer.toneMapping = THREE.NoToneMapping;
 
@@ -227,7 +230,7 @@ export function createHeroScene(canvas, { lite = false, reduced = false } = {}) 
       document.fonts?.load('600 64px Manrope'),
       document.fonts?.load('italic 300 640px "Cormorant Garamond"'),
     ]).catch(() => {});
-    const w = makeWordTexture('After Dark');
+    const w = makeWordTexture('After Dark', lite);
     const ww = 26;
     word = new THREE.Mesh(
       new THREE.PlaneGeometry(ww, ww / w.aspect),
@@ -240,6 +243,7 @@ export function createHeroScene(canvas, { lite = false, reduced = false } = {}) 
   })();
 
   /* --- layout --- */
+  let bloomScale = lite ? 0.35 : 0.5;
   let baseZ = 11;
   let baseY = 0;
   let width = 0;
@@ -256,7 +260,7 @@ export function createHeroScene(canvas, { lite = false, reduced = false } = {}) 
     camera.updateProjectionMatrix();
     renderer.setSize(w, h, false);
     composer.setSize(w, h);
-    bloom.resolution.set(w * (lite ? 0.35 : 0.5), h * (lite ? 0.35 : 0.5));
+    bloom.resolution.set(w * bloomScale, h * bloomScale);
     const t = 2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
     const zByHeight = RING_SPAN / 0.64 / t;
     const widthFill = aspect < 0.6 ? 0.84 : aspect < 1.1 ? 0.66 : 0.62; // phone / tablet / desktop
@@ -343,10 +347,30 @@ export function createHeroScene(canvas, { lite = false, reduced = false } = {}) 
     composer.render(dt);
   }
 
-  function loop() {
+  // If the device cannot keep up: fewer pixels, then a lighter bloom without multisampling, then 30 fps.
+  const gov = governor({
+    steps: [
+      () => {
+        dpr = Math.max(1, dpr * 0.75);
+        renderer.setPixelRatio(dpr);
+        composer.setPixelRatio(dpr);
+        dust.material.uniforms.uPixelRatio.value = dpr;
+        width = 0; resize();
+      },
+      () => {
+        bloomScale *= 0.6;
+        [composer.renderTarget1, composer.renderTarget2].forEach((t) => { t.samples = 0; t.dispose(); });
+        width = 0; resize();
+      },
+      'cap',
+    ],
+  });
+
+  function loop(now) {
     if (!running) return;
-    frame();
     raf = requestAnimationFrame(loop);
+    if (gov.skip(now)) return;
+    frame();
   }
   let raf = 0;
 
@@ -369,6 +393,7 @@ export function createHeroScene(canvas, { lite = false, reduced = false } = {}) 
       if (running) return;
       running = true;
       last = performance.now();
+      gov.reset();
       raf = requestAnimationFrame(loop);
     },
     stop() {

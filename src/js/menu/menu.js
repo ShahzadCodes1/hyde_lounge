@@ -1,5 +1,6 @@
-import { boot } from '../core/app.js';
+import { boot, firstPaint } from '../core/app.js';
 import { track, stageHero } from '../core/scenes.js';
+import { softwareGL } from '../core/quality.js';
 import { gsap, ScrollTrigger, reducedMotion, isTouch, getLenis } from '../core/smooth.js';
 import { createMenuScene } from './menu-scene.js';
 import { fadeInUpperZone } from '../core/zone.js';
@@ -39,9 +40,9 @@ boot('menu', {
 
 // The table is set while the curtain is down (once this module has finished running), so it is
 // live and moving the moment the curtain lifts.
-queueMicrotask(() => {
+firstPaint.then(() => { // after the curtain's first paint (see app.js), after boot() has set up the shell
   scene = track(createMenuScene(canvas, { items, lite }));
-  if (!scene) document.documentElement.classList.add('no-webgl');
+  if (!scene && !softwareGL()) document.documentElement.classList.add('no-webgl'); // software WebGL keeps the poster
   build();
   stageHero(scene, canvas, { fonts: ['italic 300 100px "Cormorant Garamond"'], prepare: () => scene.refreshWord() });
 });

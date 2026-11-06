@@ -41,7 +41,7 @@ export const ICE = { r: 0.41, y: BASE_TOP + 0.41 + 0.01 };
 export function diamondCutNormalMap(size = 256) {
   const c = document.createElement('canvas');
   c.width = c.height = size;
-  const ctx = c.getContext('2d');
+  const ctx = c.getContext('2d', { willReadFrequently: true });
   const img = ctx.createImageData(size, size);
   const h = (u, v) => 1 - Math.max(Math.abs(u - 0.5), Math.abs(v - 0.5)) * 2; // pyramid height
   for (let y = 0; y < size; y++) {

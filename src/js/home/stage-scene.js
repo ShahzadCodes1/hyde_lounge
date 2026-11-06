@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { COLORS, readPalette } from './scene-colors.js';
 import { createBackdrop, createBarTop, softboxEnvironment } from './studio.js';
+import { rejectSoftware, governor } from '../core/quality.js';
 
 /* ==========================================================================
    STAGE SCENE — Chapter 03, the stage.
@@ -134,6 +135,7 @@ export function createStageScene(canvas, { lite = false } = {}) {
   } catch {
     return null;
   }
+  if (rejectSoftware(renderer)) return null; // no graphics chip: the section shows its backdrop and copy
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, lite ? 1.25 : 1.75)); // phones: chapters render at 1.25x (the hero keeps 1.5x)
   renderer.toneMapping = THREE.NoToneMapping;
 
@@ -152,7 +154,7 @@ export function createStageScene(canvas, { lite = false } = {}) {
   const bgU = backdrop.u;
   bgU.uGlowCenter.value.set(0, 2.6);
 
-  const reflScale = lite ? 0.35 : 0.55;
+  let reflScale = lite ? 0.35 : 0.55;
   const floor = createBarTop({ lite });
   scene.add(floor.bar);
   const floorU = floor.u;
@@ -337,10 +339,23 @@ export function createStageScene(canvas, { lite = false } = {}) {
     renderer.render(scene, camera);
   }
 
-  function loop() {
+  // If the device cannot keep up: fewer pixels, then a softer reflection, then 30 fps.
+  const gov = governor({
+    steps: [
+      () => { renderer.setPixelRatio(Math.max(1, renderer.getPixelRatio() * 0.8)); width = 0; resize(); },
+      () => {
+        reflScale *= 0.6;
+        width = 0; resize();
+      },
+      'cap',
+    ],
+  });
+
+  function loop(now) {
     if (!running) return;
-    render();
     raf = requestAnimationFrame(loop);
+    if (gov.skip(now)) return;
+    render();
   }
 
   function refreshPalette() {
@@ -363,6 +378,7 @@ export function createStageScene(canvas, { lite = false } = {}) {
       if (running) return;
       running = true;
       last = performance.now();
+      gov.reset();
       raf = requestAnimationFrame(loop);
     },
     stop() {

@@ -1,5 +1,7 @@
-import { boot } from '../core/app.js';
+import { boot, firstPaint } from '../core/app.js';
 import { track, stageHero } from '../core/scenes.js';
+import { softwareGL } from '../core/quality.js';
+import { mediaUrl, revealVideo } from '../core/media.js';
 import { gsap, ScrollTrigger, reducedMotion, isTouch } from '../core/smooth.js';
 import { createLiveScene } from './live-scene.js';
 import { fadeInUpperZone } from '../core/zone.js';
@@ -35,10 +37,10 @@ boot('live', {
 });
 
 // The deck is built while the curtain is down, so it is live the moment the curtain lifts.
-queueMicrotask(() => {
+firstPaint.then(() => { // after the curtain's first paint (see app.js), after boot() has set up the shell
   scene = track(createLiveScene(canvas, { lite }));
-  if (!scene) document.documentElement.classList.add('no-webgl');
-  else scene.setTint(nights[0].dataset.hue, true);
+  if (!scene && !softwareGL()) document.documentElement.classList.add('no-webgl'); // software WebGL keeps the poster
+  scene?.setTint(nights[0].dataset.hue, true);
   if (reducedMotion) staticPage();
   else build();
   stageHero(scene, canvas, {
@@ -181,7 +183,7 @@ function initClips() {
       const fig = e.target, v = fig.querySelector('video');
       if (e.isIntersecting) {
         fig.classList.add('is-in');
-        if (!v.src && v.dataset.src) v.src = v.dataset.src;
+        if (!v.src && v.dataset.src) { v.src = mediaUrl(v.dataset.src); v.addEventListener('playing', () => revealVideo(v), { once: true }); }
         if (!reducedMotion) v.play().catch(() => {});
       } else {
         v.pause();

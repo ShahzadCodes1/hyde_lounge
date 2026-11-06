@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { COLORS, readPalette } from '../home/scene-colors.js';
 import { createBackdrop, createBarTop, softboxEnvironment } from '../home/studio.js';
+import { rejectSoftware, governor } from '../core/quality.js';
 
 /* ==========================================================================
    RESERVE SCENE — your table, set.
@@ -114,6 +115,7 @@ export function createReserveScene(canvas, { lite = false } = {}) {
   } catch {
     return null;
   }
+  if (rejectSoftware(renderer)) return null; // no graphics chip: the poster stays
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, lite ? 1.5 : 1.75));
   renderer.toneMapping = THREE.NoToneMapping;
 
@@ -136,7 +138,7 @@ export function createReserveScene(canvas, { lite = false } = {}) {
   table.setColors(room, 0.6);
   table.u.uFade.value.set(-1.6, -4.2);
   table.u.uShadow.value = 1;
-  const reflScale = lite ? 0.35 : 0.55;
+  let reflScale = lite ? 0.35 : 0.55;
 
   /* --- the place card --- */
   const info = { name: '', date: '', time: '', party: 0, occasion: '', sealed: false };
@@ -167,8 +169,8 @@ export function createReserveScene(canvas, { lite = false } = {}) {
 
   let dirty = true;
   function redraw() {
-    drawCard(artC.getContext('2d'), info, false);
-    drawCard(foilC.getContext('2d'), info, true);
+    drawCard(artC.getContext('2d', { willReadFrequently: true }), info, false);
+    drawCard(foilC.getContext('2d', { willReadFrequently: true }), info, true);
     art.needsUpdate = true; foil.needsUpdate = true;
     dirty = false;
   }
@@ -314,7 +316,20 @@ export function createReserveScene(canvas, { lite = false } = {}) {
     renderer.render(scene, camera);
   }
 
-  function loop() { if (!running) return; render(); raf = requestAnimationFrame(loop); }
+  // If the device cannot keep up: fewer pixels, then a softer reflection, then 30 fps.
+  const gov = governor({
+    steps: [
+      () => { renderer.setPixelRatio(Math.max(1, renderer.getPixelRatio() * 0.8)); width = 0; resize(); },
+      () => { reflScale *= 0.6; width = 0; resize(); },
+      'cap',
+    ],
+  });
+  function loop(now) {
+    if (!running) return;
+    raf = requestAnimationFrame(loop);
+    if (gov.skip(now)) return;
+    render();
+  }
 
   function refreshPalette() {
     readPalette();
@@ -333,7 +348,7 @@ export function createReserveScene(canvas, { lite = false } = {}) {
     refreshText() { backdrop.refreshWord(); dirty = true; },
     renderOnce: render,
     compile() { redraw(); return renderer.compileAsync ? renderer.compileAsync(scene, camera).catch(() => {}) : renderer.compile(scene, camera); },
-    start() { if (running) return; running = true; last = performance.now(); raf = requestAnimationFrame(loop); },
+    start() { if (running) return; running = true; last = performance.now(); gov.reset(); raf = requestAnimationFrame(loop); },
     stop() { running = false; cancelAnimationFrame(raf); },
   };
 }

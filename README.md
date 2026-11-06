@@ -43,13 +43,13 @@ build command `npm run build`, output `dist`. `vercel.json` enables clean URLs (
 - `src/js/core/` — shared shell: nav, mobile menu, preloader, page transitions, smooth scroll, cursor
 - `src/js/home/hero-scene.js` + `ring-sign.js` — the brass LED-ring sign hero (bloom, dust, smoke, camera dive)
 - `src/js/home/pour-scene.js` + `pour.js` — Chapter 01: the cognac pour
-- `src/js/home/plate-scene.js` + `plate.js` — Chapter 02: the kitchen (dish images in public/media/plate-*.webp)
+- `src/js/home/plate-scene.js` + `plate.js` — Chapter 02: the kitchen (dish images in src/media/plate-*.webp)
 - `src/js/home/stage-scene.js` + `play.js` — Chapter 03: the stage
 - `src/js/core/footer.js` — the shared footer (markup in shell.js)
 - `src/js/home/studio.js` — shared studio set: lighting environment, backdrop wall, reflective bar top
 - `plates/` — original 2048px dish images from Higgsfield (source files; not used by the build)
 - `src/styles/palettes.css` — colour palettes (Emerald Noir is the chosen one)
-- `public/media/` — clips and photos cut from the brand footage
+- `src/media/` — clips and photos cut from the brand footage (fingerprinted by the build; referenced by name through `src/js/core/media.js`)
 - `src/styles/base.css` — design tokens (colour, type, spacing, motion)
 
 ## Progress
@@ -59,8 +59,16 @@ build command `npm run build`, output `dist`. `vercel.json` enables clean URLs (
 - [x] Step 3 — Home: Chapter 02 "Plate" (brass cloche reveal, five-course turning table, pendant light, iris into Play)
 - [x] Step 4 — Home: Chapter 03 "Play" (chrome art-deco microphone under stage lights, venue footage) + site footer
 - [x] Step 5a — Menu page (overhead table → dishes served one by one, crystal glass changes drink, Kitchen/Bar jump pills)
-- [x] Step 5b — Live Nights page (turntable: needle drops on scroll, pinned week of seven tinted nights, needle close-up for the artists, overhead record behind the footage) · On stage now shows the four artists' portraits (client photos, cropped to 4:5, EDSR-upscaled, graded; public/media/artist-*.webp)
+- [x] Step 5b — Live Nights page (turntable: needle drops on scroll, pinned week of seven tinted nights, needle close-up for the artists, overhead record behind the footage) · On stage now shows the four artists' portraits (client photos, cropped to 4:5, EDSR-upscaled, graded; src/media/artist-*.webp)
 - [x] Step 5c — Brunch page (champagne tower: bottle pours, cascade fills tier by tier through the packages, turning plates, eye-level orbit for the afternoon)
 - [x] Step 5d — Reserve page (place card engraved live as the form is filled, candle lit on scroll, request sent to the host on WhatsApp)
 - [x] Polish pass (5 Nov): faster page switches (shorter curtains, async shader compile, background prefetch of other pages, 3D frozen on leave, multi-file preview build), fully responsive with an automated overlap/overflow audit at 7 sizes, phone fixes on every page (text fades out of the 3D zone, Reserve table window), 5th On-stage row removed
 - [ ] Vercel deploy
+
+## Performance notes
+
+- **Quality governor** (`src/js/core/quality.js`): every 3D scene times its real frame rate and steps down (fewer pixels → lighter reflections/bloom → 30 fps) if the device can't keep up. Browsers without a usable graphics chip (software WebGL) keep the poster stills instead of live 3D. Add `?gl=force` to a URL to force live 3D when testing.
+- **Home chapters** build one at a time, after the hero entrance, only while the guest isn't scrolling; on phones only once the guest is within two screens of the chapter.
+- **Build** (`vite.config.js`): page CSS is inlined into the HTML, and scripts start right after the first paint, so the curtain shows immediately. three.js is in its own long-cached chunk.
+- **Fonts**: the three first-screen font files are preloaded; size-matched local fallbacks (`site.css`) prevent layout shift while fonts load.
+- **Media**: lives in `src/media` (hashed names, cached for a year). Video posters load about a screen and a half ahead; photos and posters fade in once loaded.

@@ -4,6 +4,9 @@ import { freezeAll, openGate } from './scenes.js';
 import { PAGES } from './shell.js';
 
 const SEEN_KEY = 'hyde:seen';
+const LOGO_MS = 800;     // the curtain logo's CSS reveal ends by then (base.css, loaderLogo)
+const CAP_FIRST = 2000;  // the longest the curtain ever waits, ms since the page was requested
+const CAP_QUICK = 1300;  // the same for later pages in the visit (the closed curtain is already showing)
 let markUp;
 /** Resolves once the curtain is fully up. Pages build their 3D only after this, so GPU work
  *  (shader compiles, first frames) never holds the curtain or stalls its animation. */
@@ -17,9 +20,9 @@ const markSeen = () => { try { sessionStorage.setItem(SEEN_KEY, '1'); } catch { 
  * Later page loads in the same visit: the page opens on exactly the frame the previous page left
  * on (the closed curtain with the page name), then lifts it. The first-paint script in <head>
  * picks the mode by adding .hyde-quick to <html>.
- * The curtain waits only for the fonts (briefly). The 3D scenes are built after it has lifted
- * and fade in when their first frame is ready.
- * @param {Promise[]} tasks things to wait for (fonts)
+ * The curtain waits for the critical content only (fonts, the hero poster, the hero's first 3D
+ * frame), never for below-the-fold media, and never longer than CAP_FIRST / CAP_QUICK.
+ * @param {Promise[]} tasks things to wait for
  * @returns {Promise} resolves once the page is revealed
  */
 export function runLoader(tasks = []) {
@@ -38,9 +41,9 @@ export function runLoader(tasks = []) {
   const progress = { v: 0 };
   let done = 0;
   const all = tasks.length ? tasks : [Promise.resolve()];
-  // The logo animation runs in CSS from the first paint; this only makes sure it finishes.
-  const sinceStart = performance.now();
-  const minTime = new Promise((r) => setTimeout(r, quick ? 0 : Math.max(0, 1700 - sinceStart)));
+  // No artificial wait: the curtain lifts as soon as the page is ready. The only floor is the logo
+  // finishing the reveal it is already drawing (CSS, ~0.8 s after the first paint), so it is never cut.
+  const minTime = new Promise((r) => setTimeout(r, quick ? 0 : Math.max(0, LOGO_MS - performance.now())));
   all.forEach((p) => Promise.resolve(p).catch(() => {}).then(() => { done += 1; }));
 
   return new Promise((resolve) => {
@@ -55,10 +58,11 @@ export function runLoader(tasks = []) {
     };
     gsap.ticker.add(tick);
 
-    // Never hold the curtain for long: if a font is slow, lift anyway (text swaps in when it lands).
+    // Never hold the curtain for long: if a font is slow, lift anyway (text swaps in when it lands,
+    // in a size-matched fallback until then, so nothing shifts).
     const settled = Promise.allSettled(all);
     // (the hero's 3D first frame is one of the tasks: a device that is slower than this plays the entrance on the poster)
-    const waited = Promise.race([settled, new Promise((r) => setTimeout(r, quick ? 1500 : 2800))]);
+    const waited = Promise.race([settled, new Promise((r) => setTimeout(r, Math.max(0, (quick ? CAP_QUICK : CAP_FIRST) - performance.now())))]);
     Promise.all([waited, minTime]).then(() => {
       gsap.ticker.remove(tick);
       if (count) count.textContent = '100';

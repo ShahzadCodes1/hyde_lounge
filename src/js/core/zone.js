@@ -11,15 +11,31 @@ export function fadeInUpperZone(selector, { from = 0.62, to = 0.44 } = {}) {
   const els = [...document.querySelectorAll(selector)];
   if (!els.length) return;
   const mq = window.matchMedia('(max-aspect-ratio: 1/1)');
+  // Only elements on or near the screen are measured each frame (an element off screen keeps the
+  // value it left with: fully clear below the screen, faded above it).
+  const near = new Set();
+  const last = new Map();
+  const set = (el, z) => { const v = z.toFixed(3); if (last.get(el) !== v) { last.set(el, v); el.style.setProperty('--zone', v); } };
+  const zone = (bottom) => Math.min(1, Math.max(0, (bottom / window.innerHeight - to) / (from - to)));
+  const io = 'IntersectionObserver' in window ? new IntersectionObserver((entries) => entries.forEach((e) => {
+    if (e.isIntersecting) near.add(e.target);
+    else near.delete(e.target);
+    // the observer reports a little after the scroll: bring the element up to date from its entry
+    if (mq.matches) set(e.target, zone(e.boundingClientRect.bottom));
+  }), { rootMargin: '25% 0px' }) : null;
+  els.forEach((el) => (io ? io.observe(el) : near.add(el)));
+  let active = null;
   const update = () => {
-    const vh = window.innerHeight;
-    els.forEach((el) => {
-      if (!mq.matches) { el.style.removeProperty('--zone'); return; }
-      const b = el.getBoundingClientRect().bottom / vh;
-      const z = Math.min(1, Math.max(0, (b - to) / (from - to)));
-      el.style.setProperty('--zone', z.toFixed(3));
-    });
+    if (!mq.matches) {
+      if (active !== false) { els.forEach((el) => { el.style.removeProperty('--zone'); last.delete(el); }); active = false; }
+      return;
+    }
+    const list = active ? [...near] : els; // first run after a switch: every element
+    active = true;
+    // read every position first, then write: no layout is forced between the writes
+    const bottoms = list.map((el) => el.getBoundingClientRect().bottom);
+    list.forEach((el, i) => set(el, zone(bottoms[i])));
   };
-  ScrollTrigger.create({ start: 0, end: 'max', onUpdate: update, onRefresh: update });
+  ScrollTrigger.create({ start: 0, end: 'max', onUpdate: update, onRefresh: () => { active = active && null; update(); } });
   update();
 }

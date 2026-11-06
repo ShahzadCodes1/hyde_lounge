@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { COLORS, readPalette } from './scene-colors.js';
 import { createBackdrop, createBarTop, softboxEnvironment } from './studio.js';
+import { rejectSoftware, governor } from '../core/quality.js';
 import {
   V, LEVEL_MIN, LEVEL_MAX, LIQUID_PROFILE, ICE, GLASS_FLUTES, FLUTE_COUNT, GLASS_BODY,
   diamondCutNormalMap, glowFromWithin, surfaceTexture, crystalMaterial, iceMaterial, radiusAt, vertexColored,
@@ -82,6 +83,7 @@ export function createPourScene(canvas, { lite = false } = {}) {
   } catch {
     return null;
   }
+  if (rejectSoftware(renderer)) return null; // no graphics chip: the section shows its backdrop and copy
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, lite ? 1.25 : 1.75)); // phones: chapters render at 1.25x (the hero keeps 1.5x)
   renderer.localClippingEnabled = true;
   renderer.transmissionResolutionScale = lite ? 0.5 : 0.85;
@@ -108,7 +110,7 @@ export function createPourScene(canvas, { lite = false } = {}) {
   const bgU = backdrop.u;
 
   /* --- polished bar top with a real reflection --- */
-  const reflScale = lite ? 0.35 : 0.6;
+  let reflScale = lite ? 0.35 : 0.6;
   const barTop = createBarTop({ lite });
   scene.add(barTop.bar);
   const barU = barTop.u;
@@ -330,10 +332,24 @@ export function createPourScene(canvas, { lite = false } = {}) {
     renderer.render(scene, camera);
   }
 
-  function loop() {
+  // If the device cannot keep up: fewer pixels, then a softer reflection and refraction, then 30 fps.
+  const gov = governor({
+    steps: [
+      () => { renderer.setPixelRatio(Math.max(1, renderer.getPixelRatio() * 0.8)); width = 0; resize(); },
+      () => {
+        reflScale *= 0.6;
+        renderer.transmissionResolutionScale *= 0.6;
+        width = 0; resize();
+      },
+      'cap',
+    ],
+  });
+
+  function loop(now) {
     if (!running) return;
-    frame();
     raf = requestAnimationFrame(loop);
+    if (gov.skip(now)) return;
+    frame();
   }
 
   function refreshPalette() {
@@ -358,6 +374,7 @@ export function createPourScene(canvas, { lite = false } = {}) {
       if (running) return;
       running = true;
       last = performance.now();
+      gov.reset();
       raf = requestAnimationFrame(loop);
     },
     stop() {

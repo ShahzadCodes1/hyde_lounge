@@ -45,13 +45,22 @@
   </script>
   <link rel="stylesheet" href="/src/styles/site.css" />
   <link rel="stylesheet" href="/src/styles/live.css" />
+  <!-- the hero poster for this screen shape (the first big picture) and the fonts of the first screen -->
+  <link rel="preload" as="image" href="/src/assets/posters/live-port.webp" media="(max-aspect-ratio: 3/5)" fetchpriority="high" />
+  <link rel="preload" as="image" href="/src/assets/posters/live-tab.webp" media="(min-aspect-ratio: 6001/10000) and (max-aspect-ratio: 1/1)" fetchpriority="high" />
+  <link rel="preload" as="image" href="/src/assets/posters/live-tall.webp" media="(min-aspect-ratio: 10001/10000) and (max-aspect-ratio: 17777/10000)" fetchpriority="high" />
+  <link rel="preload" as="image" href="/src/assets/posters/live-land.webp" media="(min-aspect-ratio: 16/9) and (max-aspect-ratio: 20999/10000)" fetchpriority="high" />
+  <link rel="preload" as="image" href="/src/assets/posters/live-wide.webp" media="(min-aspect-ratio: 21/10)" fetchpriority="high" />
+  <link rel="preload" as="font" type="font/woff2" href="/node_modules/@fontsource/cormorant-garamond/files/cormorant-garamond-latin-300-normal.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="/node_modules/@fontsource/cormorant-garamond/files/cormorant-garamond-latin-300-italic.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="/node_modules/@fontsource/manrope/files/manrope-latin-400-normal.woff2" crossorigin />
 </head>
 <body data-page="live" class="is-loading">
   <!-- The curtain is part of the page itself, so it is the very first thing painted. -->
   <div class="loader" data-loader>
     <div class="loader__panel"></div>
     <div class="loader__inner">
-      <img class="loader__logo" src="/src/assets/hyde-logo.svg" alt="" />
+      <img class="loader__logo" src="/src/assets/hyde-logo.svg" alt="" width="344" height="100" fetchpriority="high" />
       <div class="loader__bar"><i></i></div>
       <div class="loader__meta"><span>Bahrain</span><span class="loader__count" data-count>000</span></div>
     </div>
@@ -144,10 +153,10 @@
         <p class="lstage__text">Recent nights have brought some of the region&rsquo;s best-loved voices to the Hyde stage.</p>
       </header>
       <ol class="lartists">
-        <li class="lartist" data-artist data-hue="#c4532e"><span class="lartist__num">01</span><span class="lartist__photo"><img src="media/artist-eslam.webp" alt="Abdulrhman Alazzawi" width="960" height="1200" loading="lazy" decoding="async" /></span><span class="lartist__name">Abdulrhman Alazzawi</span><span class="lartist__tag">Live at Hyde</span></li>
-        <li class="lartist" data-artist data-hue="#d9a84e"><span class="lartist__num">02</span><span class="lartist__photo"><img src="media/artist-hatim.webp" alt="Yousif Al Sumaidi" width="960" height="1200" loading="lazy" decoding="async" /></span><span class="lartist__name">Yousif Al Sumaidi</span><span class="lartist__tag">Live at Hyde</span></li>
-        <li class="lartist" data-artist data-hue="#b3263a"><span class="lartist__num">03</span><span class="lartist__photo"><img src="media/artist-yousif.webp" alt="Hatim Ammor" width="960" height="1200" loading="lazy" decoding="async" /></span><span class="lartist__name">Hatim Ammor</span><span class="lartist__tag">Live at Hyde</span></li>
-        <li class="lartist" data-artist data-hue="#1f8a6a"><span class="lartist__num">04</span><span class="lartist__photo"><img src="media/artist-abdulrhman.webp" alt="Eslam Elmallah" width="960" height="1200" loading="lazy" decoding="async" /></span><span class="lartist__name">Eslam Elmallah</span><span class="lartist__tag">Live at Hyde</span></li>
+        <li class="lartist" data-artist data-hue="#c4532e"><span class="lartist__num">01</span><span class="lartist__photo"><img src="/src/media/artist-eslam.webp" alt="Abdulrhman Alazzawi" width="960" height="1200" loading="lazy" decoding="async" /></span><span class="lartist__name">Abdulrhman Alazzawi</span><span class="lartist__tag">Live at Hyde</span></li>
+        <li class="lartist" data-artist data-hue="#d9a84e"><span class="lartist__num">02</span><span class="lartist__photo"><img src="/src/media/artist-hatim.webp" alt="Yousif Al Sumaidi" width="960" height="1200" loading="lazy" decoding="async" /></span><span class="lartist__name">Yousif Al Sumaidi</span><span class="lartist__tag">Live at Hyde</span></li>
+        <li class="lartist" data-artist data-hue="#b3263a"><span class="lartist__num">03</span><span class="lartist__photo"><img src="/src/media/artist-yousif.webp" alt="Hatim Ammor" width="960" height="1200" loading="lazy" decoding="async" /></span><span class="lartist__name">Hatim Ammor</span><span class="lartist__tag">Live at Hyde</span></li>
+        <li class="lartist" data-artist data-hue="#1f8a6a"><span class="lartist__num">04</span><span class="lartist__photo"><img src="/src/media/artist-abdulrhman.webp" alt="Eslam Elmallah" width="960" height="1200" loading="lazy" decoding="async" /></span><span class="lartist__name">Eslam Elmallah</span><span class="lartist__tag">Live at Hyde</span></li>
       </ol>
     </section>
 
@@ -159,19 +168,19 @@
       </header>
       <div class="lfilm__grid">
         <figure class="lclip lclip--a" data-clip data-speed="-8">
-          <div class="lclip__media"><video muted loop playsinline preload="none" poster="media/play-ring.jpg" data-src="media/play-ring.mp4"></video></div>
+          <div class="lclip__media"><video muted loop playsinline preload="none" data-poster-src="play-ring.jpg" data-src="play-ring.mp4"></video></div>
           <figcaption><span>Under the ring</span><small>Resident DJs</small></figcaption>
         </figure>
         <figure class="lclip lclip--b lclip--tall" data-clip data-speed="10">
-          <div class="lclip__media"><video muted loop playsinline preload="none" poster="media/play-bazaar.jpg" data-src="media/play-bazaar.mp4"></video></div>
+          <div class="lclip__media"><video muted loop playsinline preload="none" data-poster-src="play-bazaar.jpg" data-src="play-bazaar.mp4"></video></div>
           <figcaption><span>Hyde Bazaar</span><small>Mondays</small></figcaption>
         </figure>
         <figure class="lclip lclip--c" data-clip data-speed="-4">
-          <div class="lclip__media"><video muted loop playsinline preload="none" poster="media/play-crowd.jpg" data-src="media/play-crowd.mp4"></video></div>
+          <div class="lclip__media"><video muted loop playsinline preload="none" data-poster-src="play-crowd.jpg" data-src="play-crowd.mp4"></video></div>
           <figcaption><span>Till 2:30 AM</span><small>Every night</small></figcaption>
         </figure>
         <figure class="lclip lclip--d" data-clip data-speed="6">
-          <div class="lclip__media"><video muted loop playsinline preload="none" poster="media/play-room.jpg" data-src="media/play-room.mp4"></video></div>
+          <div class="lclip__media"><video muted loop playsinline preload="none" data-poster-src="play-room.jpg" data-src="play-room.mp4"></video></div>
           <figcaption><span>The room</span><small>Adliya</small></figcaption>
         </figure>
       </div>

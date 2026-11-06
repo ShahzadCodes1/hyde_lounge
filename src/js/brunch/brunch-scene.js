@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { COLORS, readPalette } from '../home/scene-colors.js';
 import { createBackdrop, createBarTop, softboxEnvironment, canvasTex } from '../home/studio.js';
+import { rejectSoftware, governor } from '../core/quality.js';
 import { crystalMaterial, glowFromColor, surfaceTexture, spline, dedupe, V } from '../home/glassware.js';
 
 /* ==========================================================================
@@ -104,6 +105,7 @@ export function createBrunchScene(canvas, { lite = false } = {}) {
   } catch {
     return null;
   }
+  if (rejectSoftware(renderer)) return null; // no graphics chip: the poster stays
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, lite ? 1.5 : 1.75));
   renderer.localClippingEnabled = true;
   renderer.transmissionResolutionScale = lite ? 0.5 : 0.8;
@@ -128,7 +130,7 @@ export function createBrunchScene(canvas, { lite = false } = {}) {
   floor.setColors(room, 0.7);
   floor.u.uFade.value.set(-2.2, -5.2);
   floor.u.uShadow.value = 1;
-  const reflScale = lite ? 0.35 : 0.55;
+  let reflScale = lite ? 0.35 : 0.55;
 
   /* --- materials --- */
   const seg = lite ? 64 : 96;
@@ -424,7 +426,20 @@ export function createBrunchScene(canvas, { lite = false } = {}) {
     renderer.render(scene, camera);
   }
 
-  function loop() { if (!running) return; render(); raf = requestAnimationFrame(loop); }
+  // If the device cannot keep up: fewer pixels, then a softer reflection and refraction, then 30 fps.
+  const gov = governor({
+    steps: [
+      () => { renderer.setPixelRatio(Math.max(1, renderer.getPixelRatio() * 0.8)); width = 0; resize(); },
+      () => { reflScale *= 0.6; renderer.transmissionResolutionScale *= 0.6; width = 0; resize(); },
+      'cap',
+    ],
+  });
+  function loop(now) {
+    if (!running) return;
+    raf = requestAnimationFrame(loop);
+    if (gov.skip(now)) return;
+    render();
+  }
 
   function refreshText() {
     backdrop.refreshWord();
@@ -448,7 +463,7 @@ export function createBrunchScene(canvas, { lite = false } = {}) {
     refreshText,
     renderOnce: render,
     compile() { return renderer.compileAsync ? renderer.compileAsync(scene, camera).catch(() => {}) : renderer.compile(scene, camera); },
-    start() { if (running) return; running = true; last = performance.now(); raf = requestAnimationFrame(loop); },
+    start() { if (running) return; running = true; last = performance.now(); gov.reset(); raf = requestAnimationFrame(loop); },
     stop() { running = false; cancelAnimationFrame(raf); },
   };
 }

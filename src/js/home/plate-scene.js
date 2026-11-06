@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { COLORS, readPalette } from './scene-colors.js';
 import { createBackdrop, createBarTop, softboxEnvironment } from './studio.js';
+import { rejectSoftware, governor } from '../core/quality.js';
+import { mediaUrl } from '../core/media.js';
 
 /* ==========================================================================
    PLATE SCENE — Chapter 02, the kitchen.
@@ -113,6 +115,7 @@ export function createPlateScene(canvas, { lite = false } = {}) {
   } catch {
     return null;
   }
+  if (rejectSoftware(renderer)) return null; // no graphics chip: the section shows its backdrop and copy
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, lite ? 1.25 : 1.75)); // phones: chapters render at 1.25x (the hero keeps 1.5x)
   renderer.toneMapping = THREE.NoToneMapping;
 
@@ -131,7 +134,7 @@ export function createPlateScene(canvas, { lite = false } = {}) {
   const bgU = backdrop.u;
   bgU.uGlowCenter.value.set(0, 3.2);
 
-  const reflScale = lite ? 0.35 : 0.55;
+  let reflScale = lite ? 0.35 : 0.55;
   const barTop = createBarTop({ lite });
   scene.add(barTop.bar);
   const barU = barTop.u;
@@ -172,7 +175,7 @@ export function createPlateScene(canvas, { lite = false } = {}) {
     const dish = new THREE.Mesh(new THREE.CircleGeometry(PLATE_R, 96).rotateX(-Math.PI / 2), dishMat);
     dish.position.y = 0.036;
     // phones get 640 px dish photos (half the download, a quarter of the GPU memory)
-    loader.load(import.meta.env.BASE_URL + (lite ? c.file.replace(/\.webp$/, '-sm.webp') : c.file), (tex) => {
+    loader.load(mediaUrl(lite ? c.file.replace(/\.webp$/, '-sm.webp') : c.file), (tex) => {
       tex.colorSpace = THREE.SRGBColorSpace;
       tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
       dishMat.map = tex;
@@ -295,10 +298,23 @@ export function createPlateScene(canvas, { lite = false } = {}) {
     renderer.render(scene, camera);
   }
 
-  function loop() {
+  // If the device cannot keep up: fewer pixels, then a softer reflection, then 30 fps.
+  const gov = governor({
+    steps: [
+      () => { renderer.setPixelRatio(Math.max(1, renderer.getPixelRatio() * 0.8)); width = 0; resize(); },
+      () => {
+        reflScale *= 0.6;
+        width = 0; resize();
+      },
+      'cap',
+    ],
+  });
+
+  function loop(now) {
     if (!running) return;
-    render();
     raf = requestAnimationFrame(loop);
+    if (gov.skip(now)) return;
+    render();
   }
 
   function refreshPalette() {
@@ -324,6 +340,7 @@ export function createPlateScene(canvas, { lite = false } = {}) {
       if (running) return;
       running = true;
       last = performance.now();
+      gov.reset();
       raf = requestAnimationFrame(loop);
     },
     stop() {

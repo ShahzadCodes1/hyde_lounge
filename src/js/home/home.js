@@ -1,5 +1,6 @@
-import { boot, afterCurtain } from '../core/app.js';
+import { boot, afterCurtain, firstPaint } from '../core/app.js';
 import { track, stageHero, isLeaving } from '../core/scenes.js';
+import { softwareGL } from '../core/quality.js';
 import { gsap, ScrollTrigger, reducedMotion, isTouch } from '../core/smooth.js';
 import { createHeroScene } from './hero-scene.js';
 import { initPour } from './pour.js';
@@ -30,11 +31,11 @@ boot('home', {
 });
 
 // The ring is built while the curtain is down (once this module has run), so it is live and lights
-// up as the curtain lifts. The three chapters below build one after another once the entrance is
-// over, each once the one before is ready, so they never compete with the ring (or each other).
-queueMicrotask(() => {
+// up as the curtain lifts. The three chapters below are built later (see below), so they never
+// compete with the ring (or each other).
+firstPaint.then(() => { // after the curtain's first paint (see app.js), after boot() has set up the shell
   scene = track(createHeroScene(canvas, { lite, reduced: reducedMotion }));
-  if (!scene) document.documentElement.classList.add('no-webgl');
+  if (!scene && !softwareGL()) document.documentElement.classList.add('no-webgl'); // software WebGL keeps the poster
   stageHero(scene, canvas, { ready: scene?.ready });
   // The scroll choreography of the hero and the three chapters is set up now, behind the curtain
   // (it is light), so every section works and shows its copy even if the guest scrolls before a
@@ -43,13 +44,28 @@ queueMicrotask(() => {
   chapters = [initPour, initPlate, initPlay].map((init) => init({ lite, reduced: reducedMotion }));
 });
 
-// The chapters' 3D scenes are built one after another once the entrance is over, each once the one
-// before is ready, so they never compete with the ring (or each other). A chapter the guest scrolls
-// near before its turn builds at once.
-afterCurtain(() => {
-  const later = (c) => new Promise((r) => setTimeout(() => r(isLeaving() ? null : c.build()), 250));
-  chapters.reduce((p, c) => p.then(() => later(c)), Promise.resolve())
-    .then(() => { if (!isLeaving()) ScrollTrigger.refresh(); });
+// The chapters' 3D scenes are built one at a time, in order, never during the hero entrance and
+// only while the guest is not scrolling (a build is the heaviest work on the page and would hitch
+// the scroll). On phones and tablets a chapter is built only once the guest is within two screens
+// of it, so a guest who never scrolls that far never pays for it (download, GPU memory, battery).
+// A chapter the guest reaches before its turn is built at once (see each chapter's triggers).
+const scrollIdle = () => new Promise((resolve) => {
+  let t = 0;
+  const done = () => { removeEventListener('scroll', on); resolve(); };
+  const on = () => { clearTimeout(t); t = setTimeout(done, 700); };
+  addEventListener('scroll', on, { passive: true });
+  on();
+});
+const idle = () => new Promise((r) => (window.requestIdleCallback || ((f) => setTimeout(f, 60)))(() => r(), { timeout: 1500 }));
+afterCurtain(async () => {
+  for (const c of chapters) {
+    if (lite) await c.approached;
+    await scrollIdle();
+    await idle();
+    if (isLeaving()) return;
+    await c.build();
+  }
+  if (!isLeaving()) ScrollTrigger.refresh();
 });
 
 /* ---------- intro: the sign lights up, copy rises ---------- */
