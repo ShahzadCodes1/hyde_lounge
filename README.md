@@ -41,7 +41,7 @@ build command `npm run build`, output `dist`. `vercel.json` enables clean URLs (
 ## Structure
 - `index.html, menu.html, live.html, brunch.html, reserve.html` — the five pages
 - `src/js/core/` — shared shell: nav, mobile menu, preloader, page transitions, smooth scroll, cursor
-- `src/js/home/hero-scene.js` + `ring-sign.js` — the brass LED-ring sign hero (bloom, dust, smoke, camera dive)
+- `src/js/home/hero-club.js` — the landing: the club facade at night (photograph + live footage, `src/assets/hero`, `src/media/hero-loop-*.mp4`); scroll walks up to the entrance and through the open doors into Chapter 01. Source stills and clips were cleaned and rebuilt with Higgsfield from the client footage (no event decor).
 - `src/js/home/pour-scene.js` + `pour.js` — Chapter 01: the cognac pour
 - `src/js/home/plate-scene.js` + `plate.js` — Chapter 02: the kitchen (dish images in src/media/plate-*.webp)
 - `src/js/home/stage-scene.js` + `play.js` — Chapter 03: the stage

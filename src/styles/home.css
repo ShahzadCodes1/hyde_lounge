@@ -8,24 +8,54 @@
   overflow: hidden;
   background: var(--bg);
 }
-.hero__canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+/* The scene: the club facade (still + live footage), the open doors, and the light inside.
+   Scroll scales the layers toward the entrance (home.js sets --door-x / --door-y, the doorway's
+   position on screen, as their transform origin). */
+.hero__scene { position: absolute; inset: 0; overflow: hidden; background: var(--bg); }
+.hero__layer {
+  position: absolute; inset: 0;
+  background: var(--bg) center / cover no-repeat;
+  transform-origin: var(--door-x, 50%) var(--door-y, 70%);
+  will-change: transform;
+}
+.hero__facade, .hero__loopwrap { position: absolute; inset: 0; }
+.hero__loop {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover;
+  opacity: 0; transition: opacity 1.2s ease;
+}
+.hero__loop.is-playing { opacity: 1; }
+.hero__door { opacity: 0; }
+/* the light beyond the doors: emerald and gold, then the chapter colour */
+.hero__inside {
+  position: absolute; inset: 0; opacity: 0; pointer-events: none;
+  background:
+    radial-gradient(60% 55% at 50% var(--doorway-y, 62%), color-mix(in srgb, var(--glow) 55%, var(--chapter)) 0%, transparent 70%),
+    var(--chapter);
+}
 
-/* No-WebGL fallback: a glowing CSS ring */
-.hero__fallback { display: none; }
-.no-webgl .hero__fallback {
-  display: block; position: absolute; left: 50%; top: 42%;
-  width: min(62vh, 80vw); aspect-ratio: 1; transform: translate(-50%, -50%);
-  border-radius: 50%;
-  border: 2px dotted var(--glow);
-  box-shadow: 0 0 60px color-mix(in srgb, var(--glow) 45%, transparent), inset 0 0 60px color-mix(in srgb, var(--glow) 30%, transparent);
-  background: url('../assets/hyde-logo.svg') center / 52% no-repeat;
+/* The club photographs: one framing for wider-than-square screens, one for portrait.
+   The door photograph is only fetched once the entrance is over (.is-ready, hero-club.js). */
+.hero__facade { background-image: url('../assets/hero/facade-wide.webp'); background-position: center; }
+.hero__door.is-ready { background-image: url('../assets/hero/door-wide.webp'); }
+@media (max-aspect-ratio: 1/1) {
+  .hero__facade { background-image: url('../assets/hero/facade-tall.webp'); }
+  .hero__door.is-ready { background-image: url('../assets/hero/door-tall.webp'); }
 }
 
 .hero__veil {
   position: absolute; inset: 0; pointer-events: none;
+  /* the photograph is bright cream stone: a deep night gradient under the copy keeps it legible */
   background:
-    linear-gradient(to top, color-mix(in srgb, var(--bg) 85%, transparent) 0%, transparent 38%),
+    linear-gradient(to top, color-mix(in srgb, var(--bg) 92%, transparent) 0%, color-mix(in srgb, var(--bg) 68%, transparent) 30%, transparent 58%),
     linear-gradient(to bottom, color-mix(in srgb, var(--bg) 55%, transparent) 0%, transparent 18%);
+}
+@media (max-aspect-ratio: 1/1) {
+  .hero__veil {
+    background:
+      linear-gradient(to top, color-mix(in srgb, var(--bg) 95%, transparent) 0%, color-mix(in srgb, var(--bg) 82%, transparent) 40%, transparent 68%),
+      linear-gradient(to bottom, color-mix(in srgb, var(--bg) 55%, transparent) 0%, transparent 16%);
+  }
 }
 
 .hero__content {
